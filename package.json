@@ -1,7 +1,7 @@
-﻿{
-  "name": "md-to-pdf-app",
+{
+  "name": "converter",
   "version": "1.0.0",
-  "description": "Aplicacion local y rapida para convertir archivos Markdown (.md) a PDF con UI, CLI y API REST",
+  "description": "Converter Suite - Multi-format Document & File Converter",
   "main": "server.js",
   "bin": {
     "md-pdf": "./cli.js"
@@ -10,7 +10,13 @@
     "start": "node server.js",
     "cli": "node cli.js"
   },
-  "keywords": ["markdown", "pdf", "converter", "cli", "api"],
+  "keywords": [
+    "markdown",
+    "pdf",
+    "converter",
+    "cli",
+    "api"
+  ],
   "author": "Antigravity",
   "license": "MIT",
   "dependencies": {
