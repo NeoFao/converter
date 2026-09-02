@@ -2,7 +2,6 @@ const { Marked } = require('marked');
 const { markedHighlight } = require('marked-highlight');
 const hljs = require('highlight.js');
 const katex = require('katex');
-const puppeteer = require('puppeteer-core');
 const fs = require('fs');
 const path = require('path');
 const { findBrowserPath } = require('./browser');
@@ -132,7 +131,10 @@ async function getBrowser() {
     );
   }
 
-  browserInstance = await puppeteer.launch({
+  const puppeteerMod = await import('puppeteer-core');
+  const launchFn = puppeteerMod.launch || (puppeteerMod.default && puppeteerMod.default.launch);
+
+  browserInstance = await launchFn({
     executablePath: browserPath,
     headless: true,
     args: [
