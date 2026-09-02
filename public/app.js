@@ -787,15 +787,12 @@ function renderScannerGrid() {
     const card = document.createElement('div');
     card.className = 'relative group bg-slate-950 border border-slate-800 rounded-xl overflow-hidden aspect-square flex items-center justify-center p-2 shadow-lg';
     
-    // Create canvas to show live filtered preview
     const canvas = document.createElement('canvas');
     canvas.className = 'max-w-full max-h-full object-contain rounded-lg';
     card.appendChild(canvas);
 
-    // Apply live filter
     drawFilteredImage(item, canvas, filter);
 
-    // Badges and buttons
     const badge = document.createElement('span');
     badge.className = 'absolute top-2 left-2 px-2 py-0.5 rounded-md bg-black/70 text-emerald-400 font-mono text-[10px]';
     badge.textContent = `Pág. ${index + 1}`;
@@ -837,7 +834,6 @@ function drawFilteredImage(item, canvas, filter) {
     ctx.drawImage(img, -img.width / 2, -img.height / 2);
     ctx.restore();
 
-    // Process image filters (CamScanner Magic Color, B&W, Grayscale)
     if (filter === 'magic') {
       const imgData = ctx.getImageData(0, 0, w, h);
       const d = imgData.data;
@@ -845,12 +841,10 @@ function drawFilteredImage(item, canvas, filter) {
         let r = d[i], g = d[i+1], b = d[i+2];
         let brightness = 0.299 * r + 0.587 * g + 0.114 * b;
         if (brightness > 165) {
-          // Whiten background
           d[i] = Math.min(255, r * 1.25 + 30);
           d[i+1] = Math.min(255, g * 1.25 + 30);
           d[i+2] = Math.min(255, b * 1.25 + 30);
         } else {
-          // Deepen text
           d[i] = Math.max(0, r * 0.8 - 15);
           d[i+1] = Math.max(0, g * 0.8 - 15);
           d[i+2] = Math.max(0, b * 0.8 - 15);
@@ -925,7 +919,6 @@ window.runOcrOnScannerImages = async function() {
       const item = scannerQueue[i];
       if (progressText) progressText.textContent = `Analizando página ${i + 1} de ${total}...`;
 
-      // Render offscreen canvas with rotation/filter
       const offscreenCanvas = document.createElement('canvas');
       const filter = (document.getElementById('scanner-filter-select') || {}).value || 'magic';
       await new Promise(res => {
@@ -1041,7 +1034,7 @@ window.downloadScannedPdf = async function() {
 };
 
 // ==========================================
-// TOOL 5: PDF A MARKDOWN LOGIC
+// TOOL 5: PDF A MARKDOWN (HIGH-ACCURACY GEOMETRIC + OCR FALLBACK)
 // ==========================================
 function setupPdf2MdListener() {
   const input = document.getElementById('pdf2md-file-input');
@@ -1055,8 +1048,15 @@ function setupPdf2MdListener() {
     const nameEl = document.getElementById('pdf2md-doc-name');
     const container = document.getElementById('pdf2md-result-container');
     const textarea = document.getElementById('pdf2md-textarea');
+    const statusLabel = document.getElementById('pdf2md-status-label');
+    const ocrFallback = document.getElementById('pdf2md-ocr-fallback');
+    const ocrLang = (document.getElementById('pdf2md-lang') || {}).value || 'spa';
 
     if (nameEl) nameEl.textContent = file.name.replace(/\.pdf$/i, '.md');
+    if (statusLabel) {
+      statusLabel.classList.remove('hidden');
+      statusLabel.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i>Analizando documento...';
+    }
 
     try {
       const arrayBuffer = await file.arrayBuffer();
@@ -1064,37 +1064,121 @@ function setupPdf2MdListener() {
       let fullMarkdown = '# ' + file.name.replace(/\.pdf$/i, '') + '\n\n';
 
       for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+        if (statusLabel) {
+          statusLabel.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i>Procesando página ${pageNum} de ${pdf.numPages}...`;
+        }
+
         const page = await pdf.getPage(pageNum);
         const textContent = await page.getTextContent();
-        let lastY = null;
-        let pageText = '';
+        const items = textContent.items || [];
 
-        textContent.items.forEach(item => {
-          if (lastY !== null && Math.abs(item.transform[5] - lastY) > 10) {
-            pageText += '\n';
+        // Check if page has native text or is scanned
+        const totalChars = items.reduce((sum, it) => sum + (it.str || '').trim().length, 0);
+
+        let pageMarkdown = '';
+
+        if (totalChars < 20 && ocrFallback && ocrFallback.checked) {
+          // Scanned page: Render to Canvas and run Tesseract OCR
+          if (statusLabel) {
+            statusLabel.innerHTML = `<i class="fa-solid fa-bolt mr-1 text-amber-400"></i>Ejecutando OCR en página ${pageNum}...`;
           }
-          pageText += item.str + ' ';
-          lastY = item.transform[5];
-        });
+          const viewport = page.getViewport({ scale: 2.0 });
+          const canvas = document.createElement('canvas');
+          canvas.width = viewport.width;
+          canvas.height = viewport.height;
+          const ctx = canvas.getContext('2d');
+          await page.render({ canvasContext: ctx, viewport }).promise;
+
+          const ocrRes = await Tesseract.recognize(canvas, ocrLang);
+          pageMarkdown = ocrRes.data.text.trim();
+        } else {
+          // Native text page: Group lines geometrically to prevent dropping lines or mixing columns
+          const linesMap = [];
+
+          items.forEach(item => {
+            if (!item.str || item.str.trim() === '') return;
+            const x = item.transform[4];
+            const y = item.transform[5];
+            const height = Math.hypot(item.transform[2], item.transform[3]) || item.height || 10;
+
+            let line = linesMap.find(l => Math.abs(l.y - y) <= 4);
+            if (!line) {
+              line = { y, maxHeight: height, items: [] };
+              linesMap.push(line);
+            } else {
+              line.maxHeight = Math.max(line.maxHeight, height);
+            }
+            line.items.push({ x, str: item.str, height });
+          });
+
+          // Sort lines from Top to Bottom
+          linesMap.sort((a, b) => b.y - a.y);
+
+          let prevLineY = null;
+          let prevMaxHeight = 10;
+
+          linesMap.forEach(line => {
+            // Sort items in this line from Left to Right
+            line.items.sort((a, b) => a.x - b.x);
+
+            let lineText = '';
+            line.items.forEach((it, idx) => {
+              if (idx > 0) {
+                const prevIt = line.items[idx - 1];
+                const charWidthApprox = 4.5;
+                const distance = it.x - (prevIt.x + (prevIt.str.length * charWidthApprox));
+                if (distance > 3) lineText += ' ';
+              }
+              lineText += it.str;
+            });
+
+            const trimmed = lineText.trim();
+            if (!trimmed) return;
+
+            const isH1 = line.maxHeight >= 16;
+            const isH2 = line.maxHeight >= 13 && line.maxHeight < 16;
+
+            if (prevLineY !== null && Math.abs(prevLineY - line.y) > 18) {
+              pageMarkdown += '\n\n';
+            } else if (prevLineY !== null) {
+              pageMarkdown += '\n';
+            }
+
+            if (isH1) {
+              pageMarkdown += '\n# ' + trimmed + '\n';
+            } else if (isH2) {
+              pageMarkdown += '\n## ' + trimmed + '\n';
+            } else {
+              pageMarkdown += trimmed;
+            }
+
+            prevLineY = line.y;
+            prevMaxHeight = line.maxHeight;
+          });
+        }
 
         if (pdf.numPages > 1) {
-          fullMarkdown += '## Pagina ' + pageNum + '\n\n' + pageText.trim() + '\n\n---\n\n';
+          fullMarkdown += `## Página ${pageNum}\n\n` + pageMarkdown.trim() + '\n\n---\n\n';
         } else {
-          fullMarkdown += pageText.trim() + '\n\n';
+          fullMarkdown += pageMarkdown.trim() + '\n\n';
         }
       }
 
       if (textarea) textarea.value = fullMarkdown;
       if (container) container.classList.remove('hidden');
+      if (statusLabel) {
+        statusLabel.innerHTML = '<i class="fa-solid fa-check mr-1 text-emerald-400"></i>Completado';
+      }
     } catch (err) {
-      alert('Error al leer PDF: ' + err.message);
+      alert('Error al extraer texto del PDF: ' + err.message);
+      if (statusLabel) statusLabel.classList.add('hidden');
     }
   });
 }
 
 window.copyPdf2MdText = function() {
   const textarea = document.getElementById('pdf2md-textarea');
-  if (textarea) {
+  if (textarea && textarea.value.trim()) {
     navigator.clipboard.writeText(textarea.value);
     alert('¡Markdown copiado al portapapeles!');
   }
@@ -1253,7 +1337,6 @@ function parseAndPreviewExcelData(rawText) {
       const parsed = JSON.parse(text);
       rows = Array.isArray(parsed) ? parsed : [parsed];
     } else {
-      // Parse CSV
       const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
       if (lines.length > 0) {
         const headers = lines[0].split(',').map(h => h.trim().replace(/^["']|["']$/g, ''));
