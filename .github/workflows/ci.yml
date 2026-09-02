@@ -1,0 +1,41 @@
+name: Security & Quality CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  audit-and-validate:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run npm security audit
+      run: npm audit --audit-level=high
+
+    - name: Validate JavaScript syntax
+      run: |
+        node --check server.js
+        node --check cli.js
+        node --check public/app.js
+        node --check engine/converter.js
+        node --check engine/themes.js
+        node --check engine/browser.js
+        node --check api/convert.js
+        node --check api/preview.js
+        node --check api/health.js
+        node --check api/sample.js
+        node --check api/themes.js
