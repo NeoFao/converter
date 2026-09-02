@@ -10,7 +10,7 @@ let currentModalZoom = 1.0;
 
 // State for other tools
 let wordCurrentFile = null;
-let wordCurrentHtml = '';
+let wordArrayBuffer = null;
 let imagesQueue = [];
 let pdf2mdCurrentFile = null;
 let excelCurrentData = null;
@@ -121,7 +121,7 @@ async function getSampleMarkdown() {
   } catch (e) {
     console.warn('Fallback sample');
   }
-  return '# Documento Tecnico\\n\\nEste es un documento Markdown de prueba con formulas como $$E=mc^2$$.';
+  return '# Documento Tecnico\n\nEste es un documento Markdown de prueba con formulas como $$E=mc^2$$.';
 }
 
 // --- Zoom & Theme Sync ---
@@ -521,7 +521,7 @@ async function updateEditorPreview() {
   }
 }
 // ==========================================
-// TOOL 2: WORD (.docx) A PDF LOGIC
+// TOOL 2: WORD (.docx) A PDF LOGIC (HD DOCX-PREVIEW)
 // ==========================================
 function setupWordListener() {
   const input = document.getElementById('word-file-input');
@@ -537,62 +537,106 @@ function setupWordListener() {
     const preview = document.getElementById('word-html-preview');
 
     if (nameEl) nameEl.textContent = file.name;
+    if (preview) {
+      preview.innerHTML = '<div class="p-8 text-center text-slate-500"><i class="fa-solid fa-spinner fa-spin text-2xl mb-2 text-blue-500"></i><p>Procesando estructura, tablas, fuentes y diseno de Word...</p></div>';
+    }
+    if (container) container.classList.remove('hidden');
 
     try {
-      const arrayBuffer = await file.arrayBuffer();
-      const result = await mammoth.convertToHtml({ arrayBuffer });
-      wordCurrentHtml = result.value;
-
-      if (preview) preview.innerHTML = wordCurrentHtml;
-      if (container) container.classList.remove('hidden');
+      wordArrayBuffer = await file.arrayBuffer();
+      if (preview) preview.innerHTML = '';
+      
+      // Render using high-fidelity OpenXML docx engine
+      await window.docx.renderAsync(wordArrayBuffer, preview, null, {
+        className: 'docx',
+        inWrapper: true,
+        ignoreWidth: false,
+        ignoreHeight: false,
+        ignoreFonts: false,
+        breakPages: true,
+        ignoreLastRenderedPageBreak: false,
+        experimental: true,
+        trimXmlDeclaration: true,
+        useBase64URL: true
+      });
     } catch (err) {
       alert('Error al leer el archivo Word: ' + err.message);
+      if (preview) preview.innerHTML = '<p class="text-red-500 p-4">Error al procesar el archivo Word: ' + err.message + '</p>';
     }
   });
 }
 
 window.downloadWordAsPdf = async function() {
-  if (!wordCurrentHtml || !wordCurrentFile) return;
-
+  if (!wordCurrentFile) return;
+  const preview = document.getElementById('word-html-preview');
   const btn = document.getElementById('btn-word-download-pdf');
+  if (!preview) return;
+
   if (btn) {
     btn.disabled = true;
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1.5"></i>Generando PDF...';
   }
 
-  const tempDiv = document.createElement('div');
-  tempDiv.style.position = 'fixed';
-  tempDiv.style.left = '-9999px';
-  tempDiv.style.top = '0';
-  tempDiv.style.width = '820px';
-  tempDiv.style.padding = '30px';
-  tempDiv.style.fontFamily = 'Calibri, Arial, sans-serif';
-  tempDiv.style.color = '#1e293b';
-  tempDiv.style.backgroundColor = '#ffffff';
-  tempDiv.innerHTML = wordCurrentHtml;
-  document.body.appendChild(tempDiv);
-
   const baseName = wordCurrentFile.name.replace(/\.[^/.]+$/, '');
   const opt = {
-    margin: [15, 15, 15, 15],
+    margin: [10, 10, 10, 10],
     filename: baseName + '.pdf',
     image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2, useCORS: true },
+    html2canvas: { scale: 2, useCORS: true, logging: false },
     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
     pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
   };
 
   try {
-    await html2pdf().set(opt).from(tempDiv).save();
+    // Render from the visible wrapper element directly
+    const targetEl = preview.querySelector('.docx-wrapper') || preview;
+    await html2pdf().set(opt).from(targetEl).save();
   } catch (e) {
     alert('Error al exportar Word a PDF: ' + e.message);
   } finally {
-    document.body.removeChild(tempDiv);
     if (btn) {
       btn.disabled = false;
-      btn.innerHTML = '<i class="fa-solid fa-file-arrow-down mr-1.5"></i><span>Descargar como PDF</span>';
+      btn.innerHTML = '<i class="fa-solid fa-file-arrow-down mr-1.5"></i><span>Descargar PDF</span>';
     }
   }
+};
+
+window.printWordDirectly = function() {
+  const preview = document.getElementById('word-html-preview');
+  if (!preview || !wordCurrentFile) return;
+
+  const printWindow = window.open('', '_blank');
+  if (!printWindow) {
+    window.print();
+    return;
+  }
+
+  const styleSheets = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
+    .map(el => el.outerHTML)
+    .join('\n');
+
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>${escapeHtml(wordCurrentFile.name)}</title>
+      ${styleSheets}
+      <style>
+        @page { size: auto; margin: 15mm; }
+        body { background: white !important; color: black !important; padding: 0 !important; margin: 0 !important; }
+        .docx-wrapper { background: transparent !important; padding: 0 !important; }
+        .docx { box-shadow: none !important; margin: 0 auto !important; width: 100% !important; }
+      </style>
+    </head>
+    <body>
+      ${preview.innerHTML}
+      <script>
+        setTimeout(() => { window.focus(); window.print(); window.close(); }, 500);
+      <\/script>
+    </body>
+    </html>
+  `);
+  printWindow.document.close();
 };
 
 // ==========================================

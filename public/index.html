@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Converter - Suite de Conversión</title>
+  
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -11,23 +13,33 @@
       theme: { extend: { colors: { brand: { 50: "#eef2ff", 500: "#6366f1", 600: "#4f46e5", 700: "#4338ca" } } } }
     }
   </script>
+  
+  <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- High-Fidelity Client-side Conversion Engines -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docx-preview@0.3.4/dist/docx-preview.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  
   <script>
     if (window.pdfjsLib) {
       pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     }
   </script>
+  
   <link rel="stylesheet" href="styles.css">
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-full flex flex-col font-sans">
+
+  <!-- Top Navigation Bar -->
   <header class="border-b border-slate-800 bg-slate-900/95 backdrop-blur sticky top-0 z-40">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Brand Logo -->
       <div class="flex items-center space-x-3 cursor-pointer" onclick="goToDashboard()">
         <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/25">
           <i class="fa-solid fa-arrows-rotate text-white text-lg"></i>
@@ -40,11 +52,14 @@
           <p class="text-xs text-slate-400">Plataforma de Conversi&oacute;n Universal</p>
         </div>
       </div>
+
+      <!-- Navigation Actions -->
       <div class="flex items-center space-x-3">
         <button id="btn-nav-dashboard" onclick="goToDashboard()" class="hidden px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center space-x-2 border border-slate-700 transition shadow-sm">
           <i class="fa-solid fa-grip text-indigo-400"></i>
           <span>Dashboard</span>
         </button>
+
         <div id="md-tool-tabs" class="hidden flex items-center bg-slate-800 p-1 rounded-xl border border-slate-700">
           <button id="tab-btn-files" onclick="switchToolTab('files')" class="tab-btn active px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-2 transition-all">
             <i class="fa-regular fa-folder-open"></i><span>Subir Archivos</span>
@@ -56,6 +71,7 @@
             <i class="fa-solid fa-robot"></i><span>Gu&iacute;a IA / API</span>
           </button>
         </div>
+
         <div class="hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium">
           <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
           <span id="server-status-text">Online</span>
@@ -63,6 +79,7 @@
       </div>
     </div>
   </header>
+
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">    <!-- VIEW 0: MAIN DASHBOARD -->
     <div id="view-dashboard" class="space-y-8">
       <div class="relative overflow-hidden bg-gradient-to-r from-slate-900 via-indigo-950/60 to-slate-900 border border-slate-800 rounded-3xl p-8 sm:p-10 shadow-2xl">
@@ -109,7 +126,7 @@
                 <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold flex items-center space-x-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span><span>Activo</span></span>
               </div>
               <h3 class="text-lg font-bold text-white group-hover:text-blue-300 transition">Word (.docx) a PDF</h3>
-              <p class="text-xs text-slate-400 mt-2 leading-relaxed">Convierte documentos de Microsoft Word (.docx) a formato PDF preservando encabezados, tablas, estilos e im&aacute;genes.</p>
+              <p class="text-xs text-slate-400 mt-2 leading-relaxed">Convierte documentos de Microsoft Word (.docx) a formato PDF preservando encabezados, tablas, estilos, colores y fuentes aut&eacute;nticas.</p>
             </div>
             <div class="mt-5 pt-4 border-t border-slate-800 flex items-center justify-between text-xs font-semibold text-blue-400 group-hover:text-blue-300">
               <span>Abrir conversor</span><i class="fa-solid fa-arrow-right transform group-hover:translate-x-1 transition-transform"></i>
@@ -305,7 +322,7 @@
       </div>
     </div>
 
-    <!-- VIEW 2: WORD (.docx) A PDF -->
+    <!-- VIEW 2: WORD (.docx) A PDF (HD DOCX PREVIEW) -->
     <div id="view-tool-word" class="space-y-6 hidden">
       <div class="flex items-center justify-between bg-slate-900/80 border border-slate-800 p-4 rounded-2xl">
         <div class="flex items-center space-x-3">
@@ -313,7 +330,7 @@
             <i class="fa-solid fa-arrow-left"></i><span>Dashboard</span>
           </button>
           <div class="h-4 w-px bg-slate-700"></div>
-          <span class="text-sm font-bold text-white flex items-center space-x-2"><i class="fa-regular fa-file-word text-blue-400 text-base"></i><span>Conversor de Word (.docx) a PDF</span></span>
+          <span class="text-sm font-bold text-white flex items-center space-x-2"><i class="fa-regular fa-file-word text-blue-400 text-base"></i><span>Conversor de Word (.docx) a PDF (Fidelidad Completa)</span></span>
         </div>
       </div>
       <input type="file" id="word-file-input" accept=".docx" style="display:none;">
@@ -322,7 +339,7 @@
           <div class="w-16 h-16 rounded-2xl bg-blue-500/10 text-blue-400 flex items-center justify-center text-3xl"><i class="fa-regular fa-file-word"></i></div>
           <div>
             <p class="text-base font-semibold text-white">Arrastra o selecciona tu archivo de Word (.docx)</p>
-            <p class="text-xs text-slate-400 mt-1">Preserva encabezados, tablas, listas y formatos.</p>
+            <p class="text-xs text-slate-400 mt-1">Preserva estructura exacta, estilos, fuentes, tablas, colores, im&aacute;genes y m&aacute;rgenes.</p>
           </div>
           <button type="button" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-xl shadow-md transition flex items-center space-x-2">
             <i class="fa-regular fa-folder-open"></i><span>Seleccionar archivo .docx</span>
@@ -330,22 +347,25 @@
         </div>
       </div>
       <div id="word-result-container" class="space-y-4 hidden">
-        <div class="flex items-center justify-between bg-slate-900 p-4 border border-slate-800 rounded-2xl shadow-xl">
+        <div class="flex flex-col sm:flex-row items-center justify-between bg-slate-900 p-4 border border-slate-800 rounded-2xl shadow-xl gap-3">
           <div class="flex items-center space-x-3">
             <i class="fa-regular fa-file-lines text-blue-400 text-lg"></i>
-            <span id="word-doc-name" class="text-sm font-semibold text-white">documento.docx</span>
+            <span id="word-doc-name" class="text-sm font-semibold text-white truncate max-w-xs">documento.docx</span>
           </div>
-          <button id="btn-word-download-pdf" onclick="downloadWordAsPdf()" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-xl shadow-lg shadow-blue-600/30 flex items-center space-x-2 transition">
-            <i class="fa-solid fa-file-arrow-down"></i><span>Descargar como PDF</span>
-          </button>
+          <div class="flex items-center space-x-2">
+            <button id="btn-word-print" onclick="printWordDirectly()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-slate-700 transition flex items-center space-x-1.5">
+              <i class="fa-solid fa-print text-indigo-400"></i><span>Imprimir / PDF Vectorial</span>
+            </button>
+            <button id="btn-word-download-pdf" onclick="downloadWordAsPdf()" class="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-xl shadow-lg shadow-blue-600/30 flex items-center space-x-2 transition">
+              <i class="fa-solid fa-file-arrow-down"></i><span>Descargar PDF</span>
+            </button>
+          </div>
         </div>
-        <div class="bg-white text-slate-900 border border-slate-800 rounded-2xl p-8 shadow-xl max-h-[600px] overflow-y-auto">
-          <div id="word-html-preview" class="max-w-none text-sm leading-relaxed"></div>
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6 shadow-2xl max-h-[750px] overflow-y-auto flex justify-center">
+          <div id="word-html-preview" class="w-full max-w-4xl bg-white text-black p-4 rounded-xl shadow-inner min-h-[500px]"></div>
         </div>
       </div>
-    </div>
-
-    <!-- VIEW 3: IMAGENES A PDF -->
+    </div>    <!-- VIEW 3: IMAGENES A PDF -->
     <div id="view-tool-images" class="space-y-6 hidden">
       <div class="flex items-center justify-between bg-slate-900/80 border border-slate-800 p-4 rounded-2xl">
         <div class="flex items-center space-x-3">
@@ -381,7 +401,9 @@
           </button>
         </div>
       </div>
-    </div>    <!-- VIEW 4: PDF A MARKDOWN -->
+    </div>
+
+    <!-- VIEW 4: PDF A MARKDOWN -->
     <div id="view-tool-pdf2md" class="space-y-6 hidden">
       <div class="flex items-center justify-between bg-slate-900/80 border border-slate-800 p-4 rounded-2xl">
         <div class="flex items-center space-x-3">
