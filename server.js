@@ -13,6 +13,19 @@ const { findBrowserPath } = require('./engine/browser');
 const app = express();
 const DEFAULT_PORT = parseInt(process.env.PORT, 10) || 3000;
 
+// Security Hardening
+app.disable('x-powered-by');
+
+// Security Headers Middleware
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  next();
+});
+
 // Multer memory storage for fast in-memory conversion
 const upload = multer({
   storage: multer.memoryStorage(),
