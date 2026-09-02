@@ -1,2 +1,0 @@
-// Builder script
-let parts = [];
