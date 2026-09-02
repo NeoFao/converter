@@ -1,4 +1,4 @@
-# ⚡ Converter - Suite de Conversión Universal
+# ⚡ Converter - Suite de Conversión Universal & Escáner OCR
 
 [![Web App](https://img.shields.io/badge/Web%20App-En%20Línea-6366f1?style=for-the-badge&logo=vercel)](https://converter-blue-one.vercel.app)
 [![License: MIT](https://img.shields.io/badge/License-MIT-emerald?style=for-the-badge)](LICENSE)
@@ -14,16 +14,17 @@
 
 ---
 
-## 🚀 Módulos de Conversión Activos
+## 🚀 Los 7 Módulos de Conversión & Escaneo Activos
 
 | # | Módulo | Entrada | Salida | Descripción |
 | :-: | :--- | :--- | :--- | :--- |
 | **1** | **Markdown (.md) a PDF** | `.md`, `.markdown` | PDF de alta resolución | Renderizado estilo hoja de papel con fórmulas KaTeX ($LaTeX$), resaltado de código (190+ lenguajes) y 5 temas. |
-| **2** | **Word (.docx) a PDF** | `.docx` (Word) | PDF estructurado | Conversión fiel de documentos Word preservando tablas, listas, encabezados, estilos e imágenes. |
-| **3** | **Imágenes a PDF** | PNG, JPG, WebP, GIF, SVG | PDF combinado | Agrupa una o múltiples fotos en un único documento PDF de alta calidad con autoajuste de proporciones. |
-| **4** | **PDF a Markdown** | `.pdf` | `.md` (Markdown) | Extracción de texto y estructura completa a formato Markdown limpio con editor y descarga inmediata. |
-| **5** | **HTML a PDF** | Código HTML o archivos `.html` | PDF con CSS | Editor y renderizado en tiempo real de código HTML completo a PDF. |
-| **6** | **JSON / CSV a Excel** | `.json`, `.csv` | Libro Excel (`.xlsx`) | Conversión de conjuntos de datos y tablas a archivos de hoja de cálculo Excel reales con vista previa. |
+| **2** | **Word (.docx) a PDF** | `.docx` (Word) | PDF con fidelidad total | Conversión OpenXML de documentos Word preservando tablas, listas, encabezados, estilos, colores y fuentes auténticas. |
+| **3** | **Imágenes a PDF (Directo)** | PNG, JPG, WebP, GIF | PDF rápido | Agrupa fotos en un único documento PDF de alta calidad con autoajuste de proporciones. |
+| **4** | **Escáner CamScanner & OCR** | Fotos de documentos | PDF filtrado + Texto OCR | Filtros Magic Color / Blanco y Negro, extracción de texto OCR (Español e Inglés) y exportación a PDF o TXT. |
+| **5** | **PDF a Markdown** | `.pdf` | `.md` (Markdown) | Extracción de texto y estructura completa a formato Markdown limpio con editor y descarga inmediata. |
+| **6** | **HTML a PDF** | Código HTML o archivos `.html` | PDF con CSS | Editor y renderizado en tiempo real de código HTML completo a PDF. |
+| **7** | **JSON / CSV a Excel** | `.json`, `.csv` | Libro Excel (`.xlsx`) | Conversión de conjuntos de datos y tablas a archivos de hoja de cálculo Excel reales con vista previa. |
 
 ---
 
@@ -35,21 +36,6 @@ curl -X POST https://converter-blue-one.vercel.app/api/convert \
   -H "Content-Type: application/json" \
   -d '{"markdown": "# Mi Reporte\nGenerado por IA.", "theme": "executive"}' \
   --output reporte.pdf
-```
-
-### Python
-```python
-import requests
-
-url = "https://converter-blue-one.vercel.app/api/convert"
-data = {
-    "markdown": "# Documento Técnico\nContenido generado dinámicamente.",
-    "theme": "academic",
-    "format": "A4"
-}
-response = requests.post(url, json=data)
-with open("documento.pdf", "wb") as f:
-    f.write(response.content)
 ```
 
 ---

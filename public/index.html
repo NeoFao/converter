@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Converter - Suite de Conversión</title>
+  <title>Converter - Suite Universal de Conversión & Escáner</title>
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -24,6 +24,7 @@
   <script src="https://cdn.jsdelivr.net/npm/docx-preview@0.3.4/dist/docx-preview.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   
   <script>
     if (window.pdfjsLib) {
@@ -47,9 +48,9 @@
         <div>
           <div class="flex items-center space-x-2">
             <span class="font-extrabold text-xl text-white tracking-tight">Converter</span>
-            <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 font-mono font-semibold">Suite</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 font-mono font-semibold">Suite Pro</span>
           </div>
-          <p class="text-xs text-slate-400">Plataforma de Conversi&oacute;n Universal</p>
+          <p class="text-xs text-slate-400">Plataforma Universal de Conversi&oacute;n</p>
         </div>
       </div>
 
@@ -86,13 +87,13 @@
         <div class="relative z-10 max-w-2xl space-y-3">
           <span class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 text-xs font-semibold">
             <i class="fa-solid fa-sparkles text-indigo-400"></i>
-            <span>6 M&oacute;dulos Activos</span>
+            <span>7 M&oacute;dulos Activos</span>
           </span>
           <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
             Convierte tus archivos a cualquier formato al instante
           </h1>
           <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
-            Herramientas de conversi&oacute;n de alto rendimiento y m&aacute;xima privacidad. Ejecutadas directamente en tu navegador y compatibles con IAs v&iacute;a API.
+            Suite universal de conversi&oacute;n y escaneo OCR. Alta fidelidad, procesamiento ultrarr&aacute;pido y 100% privado en tu navegador.
           </p>
         </div>
         <div class="absolute -right-10 -bottom-10 w-72 h-72 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none"></div>
@@ -103,7 +104,8 @@
           <i class="fa-solid fa-grid-2 text-indigo-400"></i><span>M&oacute;dulos de Conversi&oacute;n</span>
         </h2>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <!-- CARD 1: MARKDOWN A PDF -->
+
+          <!-- 1. MARKDOWN A PDF -->
           <div onclick="openTool('markdown')" class="group bg-slate-900/90 hover:bg-slate-850 border-2 border-indigo-500/60 hover:border-indigo-400 rounded-2xl p-6 transition-all duration-200 cursor-pointer shadow-xl hover:shadow-indigo-500/10 transform hover:-translate-y-1 flex flex-col justify-between">
             <div>
               <div class="flex items-start justify-between mb-4">
@@ -118,7 +120,7 @@
             </div>
           </div>
 
-          <!-- CARD 2: WORD A PDF -->
+          <!-- 2. WORD A PDF -->
           <div onclick="openTool('word')" class="group bg-slate-900/90 hover:bg-slate-850 border-2 border-blue-500/40 hover:border-blue-400 rounded-2xl p-6 transition-all duration-200 cursor-pointer shadow-xl hover:shadow-blue-500/10 transform hover:-translate-y-1 flex flex-col justify-between">
             <div>
               <div class="flex items-start justify-between mb-4">
@@ -126,29 +128,44 @@
                 <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold flex items-center space-x-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span><span>Activo</span></span>
               </div>
               <h3 class="text-lg font-bold text-white group-hover:text-blue-300 transition">Word (.docx) a PDF</h3>
-              <p class="text-xs text-slate-400 mt-2 leading-relaxed">Convierte documentos de Microsoft Word (.docx) a formato PDF preservando encabezados, tablas, estilos, colores y fuentes aut&eacute;nticas.</p>
+              <p class="text-xs text-slate-400 mt-2 leading-relaxed">Convierte documentos de Word preservando fuentes, colores, tablas con fondos, estilos e im&aacute;genes con fidelidad total.</p>
             </div>
             <div class="mt-5 pt-4 border-t border-slate-800 flex items-center justify-between text-xs font-semibold text-blue-400 group-hover:text-blue-300">
               <span>Abrir conversor</span><i class="fa-solid fa-arrow-right transform group-hover:translate-x-1 transition-transform"></i>
             </div>
           </div>
 
-          <!-- CARD 3: IMAGENES A PDF -->
+          <!-- 3. IMAGENES A PDF (SIN OCR / RAPIDO) -->
           <div onclick="openTool('images')" class="group bg-slate-900/90 hover:bg-slate-850 border-2 border-amber-500/40 hover:border-amber-400 rounded-2xl p-6 transition-all duration-200 cursor-pointer shadow-xl hover:shadow-amber-500/10 transform hover:-translate-y-1 flex flex-col justify-between">
             <div>
               <div class="flex items-start justify-between mb-4">
                 <div class="w-12 h-12 rounded-xl bg-amber-600/20 text-amber-400 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform"><i class="fa-regular fa-images"></i></div>
-                <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold flex items-center space-x-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span><span>Activo</span></span>
+                <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold flex items-center space-x-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span><span>R&aacute;pido</span></span>
               </div>
-              <h3 class="text-lg font-bold text-white group-hover:text-amber-300 transition">Im&aacute;genes a PDF</h3>
-              <p class="text-xs text-slate-400 mt-2 leading-relaxed">Combina una o m&uacute;ltiples fotos (PNG, JPG, WebP) en un &uacute;nico archivo PDF de alta resoluci&oacute;n con ajuste autom&aacute;tico.</p>
+              <h3 class="text-lg font-bold text-white group-hover:text-amber-300 transition">Im&aacute;genes a PDF (Directo)</h3>
+              <p class="text-xs text-slate-400 mt-2 leading-relaxed">Combina una o m&uacute;ltiples im&aacute;genes (PNG, JPG, WebP) directamente en un solo archivo PDF de alta resoluci&oacute;n sin modificaciones.</p>
             </div>
             <div class="mt-5 pt-4 border-t border-slate-800 flex items-center justify-between text-xs font-semibold text-amber-400 group-hover:text-amber-300">
               <span>Abrir conversor</span><i class="fa-solid fa-arrow-right transform group-hover:translate-x-1 transition-transform"></i>
             </div>
           </div>
 
-          <!-- CARD 4: PDF A MARKDOWN -->
+          <!-- 4. ESCANER OCR & CAMSCANNER (CON OCR) -->
+          <div onclick="openTool('scanner_ocr')" class="group bg-slate-900/90 hover:bg-slate-850 border-2 border-emerald-500/50 hover:border-emerald-400 rounded-2xl p-6 transition-all duration-200 cursor-pointer shadow-xl hover:shadow-emerald-500/10 transform hover:-translate-y-1 flex flex-col justify-between">
+            <div>
+              <div class="flex items-start justify-between mb-4">
+                <div class="w-12 h-12 rounded-xl bg-emerald-600/20 text-emerald-400 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform"><i class="fa-solid fa-camera-viewfinder"></i></div>
+                <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-semibold flex items-center space-x-1"><i class="fa-solid fa-bolt mr-1"></i><span>OCR + Filtros</span></span>
+              </div>
+              <h3 class="text-lg font-bold text-white group-hover:text-emerald-300 transition">Esc&aacute;ner CamScanner & OCR</h3>
+              <p class="text-xs text-slate-400 mt-2 leading-relaxed">Filtros de escaneado Magic Color / B&W, extracci&oacute;n inteligente de texto OCR en espa&ntilde;ol e ingl&eacute;s y exportaci&oacute;n a PDF.</p>
+            </div>
+            <div class="mt-5 pt-4 border-t border-slate-800 flex items-center justify-between text-xs font-semibold text-emerald-400 group-hover:text-emerald-300">
+              <span>Abrir esc&aacute;ner OCR</span><i class="fa-solid fa-arrow-right transform group-hover:translate-x-1 transition-transform"></i>
+            </div>
+          </div>
+
+          <!-- 5. PDF A MARKDOWN -->
           <div onclick="openTool('pdf2md')" class="group bg-slate-900/90 hover:bg-slate-850 border-2 border-purple-500/40 hover:border-purple-400 rounded-2xl p-6 transition-all duration-200 cursor-pointer shadow-xl hover:shadow-purple-500/10 transform hover:-translate-y-1 flex flex-col justify-between">
             <div>
               <div class="flex items-start justify-between mb-4">
@@ -163,7 +180,7 @@
             </div>
           </div>
 
-          <!-- CARD 5: HTML A PDF -->
+          <!-- 6. HTML A PDF -->
           <div onclick="openTool('html')" class="group bg-slate-900/90 hover:bg-slate-850 border-2 border-rose-500/40 hover:border-rose-400 rounded-2xl p-6 transition-all duration-200 cursor-pointer shadow-xl hover:shadow-rose-500/10 transform hover:-translate-y-1 flex flex-col justify-between">
             <div>
               <div class="flex items-start justify-between mb-4">
@@ -178,7 +195,7 @@
             </div>
           </div>
 
-          <!-- CARD 6: JSON / CSV A EXCEL -->
+          <!-- 7. JSON / CSV A EXCEL -->
           <div onclick="openTool('excel')" class="group bg-slate-900/90 hover:bg-slate-850 border-2 border-teal-500/40 hover:border-teal-400 rounded-2xl p-6 transition-all duration-200 cursor-pointer shadow-xl hover:shadow-teal-500/10 transform hover:-translate-y-1 flex flex-col justify-between">
             <div>
               <div class="flex items-start justify-between mb-4">
@@ -322,7 +339,7 @@
       </div>
     </div>
 
-    <!-- VIEW 2: WORD (.docx) A PDF (HD DOCX PREVIEW) -->
+    <!-- VIEW 2: WORD (.docx) A PDF -->
     <div id="view-tool-word" class="space-y-6 hidden">
       <div class="flex items-center justify-between bg-slate-900/80 border border-slate-800 p-4 rounded-2xl">
         <div class="flex items-center space-x-3">
@@ -330,7 +347,7 @@
             <i class="fa-solid fa-arrow-left"></i><span>Dashboard</span>
           </button>
           <div class="h-4 w-px bg-slate-700"></div>
-          <span class="text-sm font-bold text-white flex items-center space-x-2"><i class="fa-regular fa-file-word text-blue-400 text-base"></i><span>Conversor de Word (.docx) a PDF (Fidelidad Completa)</span></span>
+          <span class="text-sm font-bold text-white flex items-center space-x-2"><i class="fa-regular fa-file-word text-blue-400 text-base"></i><span>Conversor de Word (.docx) a PDF</span></span>
         </div>
       </div>
       <input type="file" id="word-file-input" accept=".docx" style="display:none;">
@@ -339,7 +356,7 @@
           <div class="w-16 h-16 rounded-2xl bg-blue-500/10 text-blue-400 flex items-center justify-center text-3xl"><i class="fa-regular fa-file-word"></i></div>
           <div>
             <p class="text-base font-semibold text-white">Arrastra o selecciona tu archivo de Word (.docx)</p>
-            <p class="text-xs text-slate-400 mt-1">Preserva estructura exacta, estilos, fuentes, tablas, colores, im&aacute;genes y m&aacute;rgenes.</p>
+            <p class="text-xs text-slate-400 mt-1">Preserva estructura exacta, estilos, fuentes, tablas, colores e im&aacute;genes.</p>
           </div>
           <button type="button" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-xl shadow-md transition flex items-center space-x-2">
             <i class="fa-regular fa-folder-open"></i><span>Seleccionar archivo .docx</span>
@@ -365,7 +382,9 @@
           <div id="word-html-preview" class="w-full max-w-4xl bg-white text-black p-4 rounded-xl shadow-inner min-h-[500px]"></div>
         </div>
       </div>
-    </div>    <!-- VIEW 3: IMAGENES A PDF -->
+    </div>
+
+    <!-- VIEW 3: IMAGENES A PDF (SIN OCR / DIRECTO) -->
     <div id="view-tool-images" class="space-y-6 hidden">
       <div class="flex items-center justify-between bg-slate-900/80 border border-slate-800 p-4 rounded-2xl">
         <div class="flex items-center space-x-3">
@@ -373,7 +392,7 @@
             <i class="fa-solid fa-arrow-left"></i><span>Dashboard</span>
           </button>
           <div class="h-4 w-px bg-slate-700"></div>
-          <span class="text-sm font-bold text-white flex items-center space-x-2"><i class="fa-regular fa-images text-amber-400 text-base"></i><span>Conversor de Im&aacute;genes a PDF</span></span>
+          <span class="text-sm font-bold text-white flex items-center space-x-2"><i class="fa-regular fa-images text-amber-400 text-base"></i><span>Conversor de Im&aacute;genes a PDF (Directo)</span></span>
         </div>
       </div>
       <input type="file" id="images-file-input" multiple accept="image/*" style="display:none;">
@@ -382,7 +401,7 @@
           <div class="w-16 h-16 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-3xl"><i class="fa-regular fa-images"></i></div>
           <div>
             <p class="text-base font-semibold text-white">Arrastra o selecciona tus im&aacute;genes (PNG, JPG, WebP)</p>
-            <p class="text-xs text-slate-400 mt-1">Puedes seleccionar m&uacute;ltiples im&aacute;genes para combinarlas en un solo PDF.</p>
+            <p class="text-xs text-slate-400 mt-1">Combinaci&oacute;n r&aacute;pida de fotos e im&aacute;genes sin alteraci&oacute;n a documento PDF.</p>
           </div>
           <button type="button" class="px-5 py-2.5 bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold rounded-xl shadow-md transition flex items-center space-x-2">
             <i class="fa-regular fa-folder-open"></i><span>Seleccionar Im&aacute;genes</span>
@@ -401,9 +420,110 @@
           </button>
         </div>
       </div>
-    </div>
+    </div>    <!-- VIEW 4: ESCANER CAMSCANNER & OCR -->
+    <div id="view-tool-scanner-ocr" class="space-y-6 hidden">
+      <div class="flex items-center justify-between bg-slate-900/80 border border-slate-800 p-4 rounded-2xl">
+        <div class="flex items-center space-x-3">
+          <button onclick="goToDashboard()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center space-x-1.5 transition border border-slate-700">
+            <i class="fa-solid fa-arrow-left"></i><span>Dashboard</span>
+          </button>
+          <div class="h-4 w-px bg-slate-700"></div>
+          <span class="text-sm font-bold text-white flex items-center space-x-2"><i class="fa-solid fa-camera-viewfinder text-emerald-400 text-base"></i><span>Esc&aacute;ner Tipo CamScanner & Reconocimiento OCR</span></span>
+        </div>
+      </div>
 
-    <!-- VIEW 4: PDF A MARKDOWN -->
+      <!-- Controls & Filter Toolbar -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center space-x-2">
+          <i class="fa-solid fa-wand-magic-sparkles text-emerald-400"></i><span>Ajustes de Escaneo & OCR</span>
+        </h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1.5">Filtro CamScanner</label>
+            <select id="scanner-filter-select" onchange="applyFilterToScannerImages()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+              <option value="magic" selected>🌟 Magic Color (Realce y Fondo Blanco)</option>
+              <option value="bw">📄 Blanco y Negro (Alto Contraste)</option>
+              <option value="gray">⚪ Escala de Grises</option>
+              <option value="original">🖼️ Original (Sin Filtro)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1.5">Idioma para OCR</label>
+            <select id="ocr-lang-select" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+              <option value="spa" selected>🇪🇸 Español</option>
+              <option value="eng">🇺🇸 Inglés (English)</option>
+              <option value="spa+eng">🌐 Español + Inglés</option>
+            </select>
+          </div>
+          <div class="flex items-end">
+            <button id="btn-run-ocr" onclick="runOcrOnScannerImages()" class="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl transition shadow-lg shadow-indigo-600/20 flex items-center justify-center space-x-2">
+              <i class="fa-solid fa-magnifying-glass-chart"></i><span>Reconocer Texto (OCR)</span>
+            </button>
+          </div>
+          <div class="flex items-end">
+            <button id="btn-download-scanned-pdf" onclick="downloadScannedPdf()" class="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-xl transition shadow-lg shadow-emerald-600/20 flex items-center justify-center space-x-2">
+              <i class="fa-solid fa-file-pdf"></i><span>Descargar PDF Escaneado</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Progress Bar for OCR -->
+        <div id="ocr-progress-container" class="hidden space-y-1.5 pt-2 border-t border-slate-800">
+          <div class="flex items-center justify-between text-xs">
+            <span id="ocr-progress-text" class="text-emerald-400 font-medium">Iniciando motor OCR...</span>
+            <span id="ocr-progress-percent" class="text-slate-400 font-mono">0%</span>
+          </div>
+          <div class="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
+            <div id="ocr-progress-bar" class="bg-emerald-500 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dropzone for Scanner -->
+      <input type="file" id="scanner-file-input" multiple accept="image/*" style="display:none;">
+      <div onclick="document.getElementById('scanner-file-input').click()" class="border-2 border-dashed border-slate-700 hover:border-emerald-500 bg-slate-900/60 hover:bg-slate-900 rounded-2xl p-10 text-center transition cursor-pointer shadow-lg">
+        <div class="flex flex-col items-center justify-center space-y-4">
+          <div class="w-16 h-16 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-3xl"><i class="fa-solid fa-camera"></i></div>
+          <div>
+            <p class="text-base font-semibold text-white">Arrastra o toma fotos de tus documentos aqu&iacute;</p>
+            <p class="text-xs text-slate-400 mt-1">El filtro Magic Color remover&aacute; sombras e iluminar&aacute; el fondo autom&aacute;ticamente.</p>
+          </div>
+          <button type="button" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-xl shadow-md transition flex items-center space-x-2">
+            <i class="fa-regular fa-folder-open"></i><span>Seleccionar Fotos / Documentos</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Scanned Images Grid and OCR Result Split -->
+      <div id="scanner-content-area" class="space-y-6 hidden">
+        <div class="flex items-center justify-between">
+          <span id="scanner-count-label" class="text-xs font-semibold text-emerald-400 px-3 py-1 bg-emerald-500/10 rounded-full border border-emerald-500/20">0 páginas cargadas</span>
+          <button onclick="clearScannerQueue()" class="text-xs px-3 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 transition">Limpiar Todo</button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Left: Scanned Pages Grid -->
+          <div class="space-y-3 bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl">
+            <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">P&aacute;ginas Procesadas (Filtro en Vivo)</h3>
+            <div id="scanner-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[500px] overflow-y-auto p-1"></div>
+          </div>
+
+          <!-- Right: Extracted OCR Text -->
+          <div class="space-y-3 bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl flex flex-col">
+            <div class="flex items-center justify-between">
+              <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center space-x-1.5">
+                <i class="fa-solid fa-align-left text-emerald-400"></i><span>Texto Extra&iacute;do (OCR)</span>
+              </h3>
+              <div class="flex items-center space-x-2">
+                <button onclick="copyScannerOcrText()" class="text-xs px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition"><i class="fa-regular fa-copy mr-1"></i>Copiar</button>
+                <button onclick="downloadScannerOcrText()" class="text-xs px-2.5 py-1 rounded-lg bg-indigo-600/30 hover:bg-indigo-600/40 text-indigo-300 border border-indigo-500/30 transition"><i class="fa-solid fa-download mr-1"></i>Guardar .txt</button>
+              </div>
+            </div>
+            <textarea id="scanner-ocr-textarea" placeholder="Haz clic en 'Reconocer Texto (OCR)' para extraer el contenido de las imagenes..." class="w-full flex-1 min-h-[350px] bg-slate-950 border border-slate-800 rounded-xl p-3 text-slate-200 font-mono text-xs resize-none focus:outline-none focus:ring-2 focus:ring-emerald-500 leading-relaxed"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>    <!-- VIEW 5: PDF A MARKDOWN -->
     <div id="view-tool-pdf2md" class="space-y-6 hidden">
       <div class="flex items-center justify-between bg-slate-900/80 border border-slate-800 p-4 rounded-2xl">
         <div class="flex items-center space-x-3">
@@ -442,7 +562,7 @@
       </div>
     </div>
 
-    <!-- VIEW 5: HTML A PDF -->
+    <!-- VIEW 6: HTML A PDF -->
     <div id="view-tool-html" class="space-y-6 hidden">
       <div class="flex items-center justify-between bg-slate-900/80 border border-slate-800 p-4 rounded-2xl">
         <div class="flex items-center space-x-3">
@@ -475,7 +595,7 @@
       </div>
     </div>
 
-    <!-- VIEW 6: JSON / CSV A EXCEL -->
+    <!-- VIEW 7: JSON / CSV A EXCEL -->
     <div id="view-tool-excel" class="space-y-6 hidden">
       <div class="flex items-center justify-between bg-slate-900/80 border border-slate-800 p-4 rounded-2xl">
         <div class="flex items-center space-x-3">

@@ -8,17 +8,18 @@ let cachedSampleMarkdown = '';
 let currentZoom = 1.0;
 let currentModalZoom = 1.0;
 
-// State for other tools
+// State for tools
 let wordCurrentFile = null;
 let wordArrayBuffer = null;
 let imagesQueue = [];
+let scannerQueue = [];
 let pdf2mdCurrentFile = null;
 let excelCurrentData = null;
 
-// --- Navigation Router ---
+// --- 7-Tool Navigation Router ---
 window.goToDashboard = function() {
   currentTool = 'dashboard';
-  const tools = ['markdown', 'word', 'images', 'pdf2md', 'html', 'excel'];
+  const tools = ['markdown', 'word', 'images', 'scanner-ocr', 'pdf2md', 'html', 'excel'];
   tools.forEach(t => {
     const el = document.getElementById('view-tool-' + t);
     if (el) el.classList.add('hidden');
@@ -42,9 +43,10 @@ window.openTool = function(toolName) {
   if (viewDashboard) viewDashboard.classList.add('hidden');
   if (btnNavDashboard) btnNavDashboard.classList.remove('hidden');
 
-  const tools = ['markdown', 'word', 'images', 'pdf2md', 'html', 'excel'];
+  const tools = ['markdown', 'word', 'images', 'scanner_ocr', 'pdf2md', 'html', 'excel'];
   tools.forEach(t => {
-    const el = document.getElementById('view-tool-' + t);
+    const elementId = t === 'scanner_ocr' ? 'view-tool-scanner-ocr' : ('view-tool-' + t);
+    const el = document.getElementById(elementId);
     if (!el) return;
     if (t === toolName) {
       el.classList.remove('hidden');
@@ -156,6 +158,19 @@ function applyZoomToFrame(frameId, zoomLevel) {
   }
 }
 
+function escapeHtml(str) {
+  return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function formatBytes(bytes, decimals = 1) {
+  if (!+bytes) return '0 B';
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ['B', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+}
+
 // ==========================================
 // TOOL 1: MARKDOWN A PDF LOGIC
 // ==========================================
@@ -236,19 +251,6 @@ function readFileAsText(file) {
     reader.onerror = reject;
     reader.readAsText(file);
   });
-}
-
-function formatBytes(bytes, decimals = 1) {
-  if (!+bytes) return '0 B';
-  const k = 1024;
-  const dm = decimals < 0 ? 0 : decimals;
-  const sizes = ['B', 'KB', 'MB', 'GB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
-}
-
-function escapeHtml(str) {
-  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 function renderFileList() {
@@ -520,8 +522,9 @@ async function updateEditorPreview() {
     console.error('Error vista previa:', err);
   }
 }
+
 // ==========================================
-// TOOL 2: WORD (.docx) A PDF LOGIC (HD DOCX-PREVIEW)
+// TOOL 2: WORD (.docx) A PDF LOGIC (HD OPENXML)
 // ==========================================
 function setupWordListener() {
   const input = document.getElementById('word-file-input');
@@ -538,7 +541,7 @@ function setupWordListener() {
 
     if (nameEl) nameEl.textContent = file.name;
     if (preview) {
-      preview.innerHTML = '<div class="p-8 text-center text-slate-500"><i class="fa-solid fa-spinner fa-spin text-2xl mb-2 text-blue-500"></i><p>Procesando estructura, tablas, fuentes y diseno de Word...</p></div>';
+      preview.innerHTML = '<div class="p-8 text-center text-slate-500"><i class="fa-solid fa-spinner fa-spin text-2xl mb-2 text-blue-500"></i><p>Procesando estructura y diseno de Word...</p></div>';
     }
     if (container) container.classList.remove('hidden');
 
@@ -546,7 +549,6 @@ function setupWordListener() {
       wordArrayBuffer = await file.arrayBuffer();
       if (preview) preview.innerHTML = '';
       
-      // Render using high-fidelity OpenXML docx engine
       await window.docx.renderAsync(wordArrayBuffer, preview, null, {
         className: 'docx',
         inWrapper: true,
@@ -561,7 +563,7 @@ function setupWordListener() {
       });
     } catch (err) {
       alert('Error al leer el archivo Word: ' + err.message);
-      if (preview) preview.innerHTML = '<p class="text-red-500 p-4">Error al procesar el archivo Word: ' + err.message + '</p>';
+      if (preview) preview.innerHTML = '<p class="text-red-500 p-4">Error: ' + err.message + '</p>';
     }
   });
 }
@@ -588,7 +590,6 @@ window.downloadWordAsPdf = async function() {
   };
 
   try {
-    // Render from the visible wrapper element directly
     const targetEl = preview.querySelector('.docx-wrapper') || preview;
     await html2pdf().set(opt).from(targetEl).save();
   } catch (e) {
@@ -640,7 +641,7 @@ window.printWordDirectly = function() {
 };
 
 // ==========================================
-// TOOL 3: IMAGENES A PDF LOGIC
+// TOOL 3: IMAGENES A PDF (DIRECTO / SIN OCR)
 // ==========================================
 function setupImagesListener() {
   const input = document.getElementById('images-file-input');
@@ -650,7 +651,7 @@ function setupImagesListener() {
     const files = Array.from(e.target.files);
     files.forEach(file => {
       const url = URL.createObjectURL(file);
-      imagesQueue.push({ id: 'img_' + Math.random().toString(36).substring(2, 9), file, url });
+      imagesQueue.push({ id: 'img_' + Math.random().toString(36).substring(2, 9), file, url, rotation: 0 });
     });
     renderImagesGrid();
     input.value = '';
@@ -748,9 +749,299 @@ window.convertImagesToPdf = async function() {
     }
   }
 };
+// ==========================================
+// TOOL 4: ESCANER CAMSCANNER & OCR LOGIC
+// ==========================================
+function setupScannerListener() {
+  const input = document.getElementById('scanner-file-input');
+  if (!input) return;
+
+  input.addEventListener('change', (e) => {
+    const files = Array.from(e.target.files);
+    files.forEach(file => {
+      const url = URL.createObjectURL(file);
+      scannerQueue.push({ id: 'scan_' + Math.random().toString(36).substring(2, 9), file, url, rotation: 0 });
+    });
+    renderScannerGrid();
+    input.value = '';
+  });
+}
+
+function renderScannerGrid() {
+  const contentArea = document.getElementById('scanner-content-area');
+  const countLabel = document.getElementById('scanner-count-label');
+  const grid = document.getElementById('scanner-grid');
+  const filter = (document.getElementById('scanner-filter-select') || {}).value || 'magic';
+
+  if (!contentArea || !grid) return;
+  if (scannerQueue.length === 0) {
+    contentArea.classList.add('hidden');
+    return;
+  }
+
+  contentArea.classList.remove('hidden');
+  if (countLabel) countLabel.textContent = scannerQueue.length + (scannerQueue.length > 1 ? ' páginas cargadas' : ' página cargada');
+  grid.innerHTML = '';
+
+  scannerQueue.forEach((item, index) => {
+    const card = document.createElement('div');
+    card.className = 'relative group bg-slate-950 border border-slate-800 rounded-xl overflow-hidden aspect-square flex items-center justify-center p-2 shadow-lg';
+    
+    // Create canvas to show live filtered preview
+    const canvas = document.createElement('canvas');
+    canvas.className = 'max-w-full max-h-full object-contain rounded-lg';
+    card.appendChild(canvas);
+
+    // Apply live filter
+    drawFilteredImage(item, canvas, filter);
+
+    // Badges and buttons
+    const badge = document.createElement('span');
+    badge.className = 'absolute top-2 left-2 px-2 py-0.5 rounded-md bg-black/70 text-emerald-400 font-mono text-[10px]';
+    badge.textContent = `Pág. ${index + 1}`;
+    card.appendChild(badge);
+
+    const btnGroup = document.createElement('div');
+    btnGroup.className = 'absolute top-2 right-2 flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition';
+    btnGroup.innerHTML = `
+      <button onclick="rotateScannerImage('${item.id}')" title="Rotar 90°" class="w-6 h-6 rounded-md bg-slate-800/90 text-slate-200 flex items-center justify-center text-[10px] hover:bg-slate-700 shadow-md">
+        <i class="fa-solid fa-rotate-right"></i>
+      </button>
+      <button onclick="removeScannerImage('${item.id}')" title="Eliminar" class="w-6 h-6 rounded-md bg-red-600/90 text-white flex items-center justify-center text-[10px] hover:bg-red-500 shadow-md">
+        <i class="fa-regular fa-trash-can"></i>
+      </button>
+    `;
+    card.appendChild(btnGroup);
+
+    grid.appendChild(card);
+  });
+}
+
+function drawFilteredImage(item, canvas, filter) {
+  const img = new Image();
+  img.src = item.url;
+  img.onload = () => {
+    const rads = (item.rotation || 0) * Math.PI / 180;
+    const isRotated = (item.rotation % 180 !== 0);
+    const w = isRotated ? img.height : img.width;
+    const h = isRotated ? img.width : img.height;
+
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, w, h);
+
+    ctx.save();
+    ctx.translate(w / 2, h / 2);
+    ctx.rotate(rads);
+    ctx.drawImage(img, -img.width / 2, -img.height / 2);
+    ctx.restore();
+
+    // Process image filters (CamScanner Magic Color, B&W, Grayscale)
+    if (filter === 'magic') {
+      const imgData = ctx.getImageData(0, 0, w, h);
+      const d = imgData.data;
+      for (let i = 0; i < d.length; i += 4) {
+        let r = d[i], g = d[i+1], b = d[i+2];
+        let brightness = 0.299 * r + 0.587 * g + 0.114 * b;
+        if (brightness > 165) {
+          // Whiten background
+          d[i] = Math.min(255, r * 1.25 + 30);
+          d[i+1] = Math.min(255, g * 1.25 + 30);
+          d[i+2] = Math.min(255, b * 1.25 + 30);
+        } else {
+          // Deepen text
+          d[i] = Math.max(0, r * 0.8 - 15);
+          d[i+1] = Math.max(0, g * 0.8 - 15);
+          d[i+2] = Math.max(0, b * 0.8 - 15);
+        }
+      }
+      ctx.putImageData(imgData, 0, 0);
+    } else if (filter === 'bw') {
+      const imgData = ctx.getImageData(0, 0, w, h);
+      const d = imgData.data;
+      for (let i = 0; i < d.length; i += 4) {
+        let gray = 0.299 * d[i] + 0.587 * d[i+1] + 0.114 * d[i+2];
+        let val = gray > 140 ? 255 : 0;
+        d[i] = val; d[i+1] = val; d[i+2] = val;
+      }
+      ctx.putImageData(imgData, 0, 0);
+    } else if (filter === 'gray') {
+      const imgData = ctx.getImageData(0, 0, w, h);
+      const d = imgData.data;
+      for (let i = 0; i < d.length; i += 4) {
+        let gray = Math.min(255, (0.299 * d[i] + 0.587 * d[i+1] + 0.114 * d[i+2]) * 1.15);
+        d[i] = gray; d[i+1] = gray; d[i+2] = gray;
+      }
+      ctx.putImageData(imgData, 0, 0);
+    }
+  };
+}
+
+window.applyFilterToScannerImages = function() {
+  renderScannerGrid();
+};
+
+window.rotateScannerImage = function(id) {
+  const item = scannerQueue.find(i => i.id === id);
+  if (item) {
+    item.rotation = ((item.rotation || 0) + 90) % 360;
+    renderScannerGrid();
+  }
+};
+
+window.removeScannerImage = function(id) {
+  scannerQueue = scannerQueue.filter(i => i.id !== id);
+  renderScannerGrid();
+};
+
+window.clearScannerQueue = function() {
+  scannerQueue = [];
+  const ocrTextarea = document.getElementById('scanner-ocr-textarea');
+  if (ocrTextarea) ocrTextarea.value = '';
+  renderScannerGrid();
+};
+
+window.runOcrOnScannerImages = async function() {
+  if (scannerQueue.length === 0) return alert('Por favor sube al menos una imagen para escanear.');
+
+  const lang = (document.getElementById('ocr-lang-select') || {}).value || 'spa';
+  const progressContainer = document.getElementById('ocr-progress-container');
+  const progressBar = document.getElementById('ocr-progress-bar');
+  const progressText = document.getElementById('ocr-progress-text');
+  const progressPercent = document.getElementById('ocr-progress-percent');
+  const ocrTextarea = document.getElementById('scanner-ocr-textarea');
+  const btn = document.getElementById('btn-run-ocr');
+
+  if (progressContainer) progressContainer.classList.remove('hidden');
+  if (btn) btn.disabled = true;
+  if (ocrTextarea) ocrTextarea.value = '';
+
+  let fullExtractedText = '';
+  const total = scannerQueue.length;
+
+  try {
+    for (let i = 0; i < total; i++) {
+      const item = scannerQueue[i];
+      if (progressText) progressText.textContent = `Analizando página ${i + 1} de ${total}...`;
+
+      // Render offscreen canvas with rotation/filter
+      const offscreenCanvas = document.createElement('canvas');
+      const filter = (document.getElementById('scanner-filter-select') || {}).value || 'magic';
+      await new Promise(res => {
+        drawFilteredImage(item, offscreenCanvas, filter);
+        setTimeout(res, 200);
+      });
+
+      const workerRes = await Tesseract.recognize(offscreenCanvas, lang, {
+        logger: m => {
+          if (m.status === 'recognizing text') {
+            const pagePct = (m.progress || 0);
+            const totalPct = Math.round(((i + pagePct) / total) * 100);
+            if (progressBar) progressBar.style.width = totalPct + '%';
+            if (progressPercent) progressPercent.textContent = totalPct + '%';
+          }
+        }
+      });
+
+      const pageText = workerRes.data.text.trim();
+      fullExtractedText += `=== PÁGINA ${i + 1} ===\n\n` + pageText + '\n\n';
+      if (ocrTextarea) ocrTextarea.value = fullExtractedText;
+    }
+
+    if (progressText) progressText.textContent = '¡Escaneo OCR completado con éxito!';
+    if (progressBar) progressBar.style.width = '100%';
+    if (progressPercent) progressPercent.textContent = '100%';
+  } catch (err) {
+    alert('Error durante el OCR: ' + err.message);
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+};
+
+window.copyScannerOcrText = function() {
+  const textarea = document.getElementById('scanner-ocr-textarea');
+  if (textarea && textarea.value.trim()) {
+    navigator.clipboard.writeText(textarea.value);
+    alert('¡Texto OCR copiado al portapapeles!');
+  } else {
+    alert('Primero ejecuta el escaneo OCR.');
+  }
+};
+
+window.downloadScannerOcrText = function() {
+  const textarea = document.getElementById('scanner-ocr-textarea');
+  if (!textarea || !textarea.value.trim()) return alert('No hay texto OCR para descargar.');
+
+  const blob = new Blob([textarea.value], { type: 'text/plain;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'texto_escaneado_ocr.txt';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+};
+
+window.downloadScannedPdf = async function() {
+  if (scannerQueue.length === 0) return alert('Por favor sube al menos una imagen.');
+  const btn = document.getElementById('btn-download-scanned-pdf');
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1.5"></i>Generando PDF...';
+  }
+
+  try {
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const pageWidth = 210;
+    const pageHeight = 297;
+    const margin = 8;
+    const maxW = pageWidth - (margin * 2);
+    const maxH = pageHeight - (margin * 2);
+
+    const filter = (document.getElementById('scanner-filter-select') || {}).value || 'magic';
+
+    for (let i = 0; i < scannerQueue.length; i++) {
+      if (i > 0) pdf.addPage();
+      const item = scannerQueue[i];
+
+      const canvas = document.createElement('canvas');
+      await new Promise(res => {
+        drawFilteredImage(item, canvas, filter);
+        setTimeout(res, 200);
+      });
+
+      let w = canvas.width;
+      let h = canvas.height;
+      const ratio = w / h;
+
+      let drawW = maxW;
+      let drawH = drawW / ratio;
+      if (drawH > maxH) {
+        drawH = maxH;
+        drawW = drawH * ratio;
+      }
+
+      const x = (pageWidth - drawW) / 2;
+      const y = (pageHeight - drawH) / 2;
+
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
+      pdf.addImage(dataUrl, 'JPEG', x, y, drawW, drawH);
+    }
+
+    pdf.save('documento_escaneado_camscanner.pdf');
+  } catch (err) {
+    alert('Error al exportar PDF: ' + err.message);
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-file-pdf mr-1.5"></i><span>Descargar PDF Escaneado</span>';
+    }
+  }
+};
 
 // ==========================================
-// TOOL 4: PDF A MARKDOWN LOGIC
+// TOOL 5: PDF A MARKDOWN LOGIC
 // ==========================================
 function setupPdf2MdListener() {
   const input = document.getElementById('pdf2md-file-input');
@@ -823,7 +1114,7 @@ window.downloadPdf2MdFile = function() {
 };
 
 // ==========================================
-// TOOL 5: HTML A PDF LOGIC
+// TOOL 6: HTML A PDF LOGIC
 // ==========================================
 function setupHtmlListener() {
   const textarea = document.getElementById('html-textarea');
@@ -919,7 +1210,7 @@ window.convertHtmlToPdf = async function() {
 };
 
 // ==========================================
-// TOOL 6: JSON / CSV A EXCEL LOGIC
+// TOOL 7: JSON / CSV A EXCEL LOGIC
 // ==========================================
 function setupExcelListener() {
   const input = document.getElementById('excel-file-input');
@@ -1083,6 +1374,7 @@ function initApp() {
   setupEditorListeners();
   setupWordListener();
   setupImagesListener();
+  setupScannerListener();
   setupPdf2MdListener();
   setupHtmlListener();
   setupExcelListener();
