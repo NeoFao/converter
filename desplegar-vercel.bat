@@ -1,21 +1,31 @@
 @echo off
+setlocal enabledelayedexpansion
 title Desplegar MD to PDF en Vercel (100% Gratis)
+
 echo ===================================================
-echo     Desplegando en Vercel (100% Gratis de por Vida)
+echo     Desplegar en Vercel (100% Gratis y Permanente)
 echo ===================================================
 echo.
-echo  Este proceso subira tu aplicacion a la nube de Vercel.
-echo  Obtendras un enlace publico permanente con HTTPS.
-echo.
-echo  Si es tu primera vez, Vercel te pedira iniciar sesion
-echo  con tu cuenta gratuita (GitHub, Google o Email).
+echo  Paso 1: Iniciando sesion en Vercel...
+echo  (Se abrira una opcion para entrar con GitHub, Google o Email)
 echo ===================================================
 echo.
 
-npx vercel --prod
+call npx vercel login
 
 echo.
 echo ===================================================
-echo  Proceso finalizado. Puedes acceder a tu URL publica.
+echo  Paso 2: Subiendo y desplegando la aplicacion...
 echo ===================================================
-pause
+echo.
+
+call npx vercel --prod
+
+echo.
+echo ===================================================
+echo  Despliegue finalizado!
+echo  Revisa la URL publica entregada por Vercel arriba.
+echo ===================================================
+echo.
+echo  Presiona cualquier tecla para cerrar esta ventana.
+pause >nul
