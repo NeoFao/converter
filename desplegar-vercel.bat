@@ -6,25 +6,17 @@ echo ===================================================
 echo     Desplegar en Vercel (100% Gratis y Permanente)
 echo ===================================================
 echo.
-echo  Paso 1: Iniciando sesion en Vercel...
-echo  (Se abrira una opcion para entrar con GitHub, Google o Email)
+echo  Subiendo y desplegando la aplicacion en Vercel...
 echo ===================================================
 echo.
 
-call npx vercel login
-
-echo.
-echo ===================================================
-echo  Paso 2: Subiendo y desplegando la aplicacion...
-echo ===================================================
-echo.
-
-call npx vercel --prod
+:: Despliegue con nombre en minusculas y confirmacion automatica
+call npx vercel --prod --yes --name md-to-pdf-converter
 
 echo.
 echo ===================================================
 echo  Despliegue finalizado!
-echo  Revisa la URL publica entregada por Vercel arriba.
+echo  Revisa la URL publica permanente arriba.
 echo ===================================================
 echo.
 echo  Presiona cualquier tecla para cerrar esta ventana.
