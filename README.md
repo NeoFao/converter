@@ -1,46 +1,39 @@
-# ? Converter - Suite de Conversi?n Universal
+# ⚡ Converter - Suite de Conversión Universal
 
-[![Live App](https://img.shields.io/badge/Web%20App-En%20L?nea-6366f1?style=for-the-badge&logo=vercel)](https://converter-blue-one.vercel.app)
+[![Web App](https://img.shields.io/badge/Web%20App-En%20Línea-6366f1?style=for-the-badge&logo=vercel)](https://converter-blue-one.vercel.app)
 [![License: MIT](https://img.shields.io/badge/License-MIT-emerald?style=for-the-badge)](LICENSE)
 [![Security: Protected PRs](https://img.shields.io/badge/Security-PRs%20Only-blueviolet?style=for-the-badge&logo=github)](CONTRIBUTING.md)
 
-**Converter** es una plataforma moderna, r?pida y modular para convertir documentos y archivos entre m?ltiples formatos con calidad profesional. Dise?ada tanto para usuarios humanos mediante una interfaz web interactiva como para Inteligencias Artificiales y desarrolladores a trav?s de CLI y API REST.
+**Converter** es una plataforma moderna, rápida y modular para convertir documentos y archivos entre múltiples formatos con calidad profesional. Diseñada tanto para usuarios humanos mediante una interfaz web interactiva como para Inteligencias Artificiales y desarrolladores a través de CLI y API REST.
 
 ---
 
-## ?? Aplicaci?n en L?nea (100% Gratis y Permanente)
+## 🌐 Aplicación en Línea (100% Gratis y Permanente)
 
-?? **Accede a la app en vivo:** [https://converter-blue-one.vercel.app](https://converter-blue-one.vercel.app)
-
----
-
-## ?? M?dulos y Funcionalidades
-
-### 1. ?? Markdown (.md) a PDF (Activo)
-- **Renderizado de Alta Fidelidad**: Tipograf?a cuidada, saltos de p?gina inteligentes y maquetaci?n estilo hoja de papel f?sica.
-- **F?rmulas Matem?ticas $\LaTeX$**: Soporte completo para ecuaciones matem?ticas en l?nea (`$..$`) y en bloque (`$$..$$`) con KaTeX.
-- **Resaltado de Sintaxis**: Soporte para m?s de 190 lenguajes de programaci?n mediante Highlight.js.
-- **5 Temas de Dise?o**: GitHub Modern, Academic Paper, Executive Report, Minimalist Clean y Modern Dark.
-- **Opciones de P?gina**: Tama?os A4, Carta (Letter), Legal, A3, orientaci?n horizontal/vertical y m?rgenes personalizables.
-- **Conversi?n por Lotes**: Convierte decenas de archivos a la vez y desc?rgalos empaquetados en un `.zip`.
-- **Editor en Vivo con Zoom**: Editor interactivo con vista previa en tiempo real y controles de zoom (`[-] 100% [+]`).
-
-### 2. ?? Pr?ximos M?dulos del Dashboard (En Desarrollo)
-- **Word (.docx) a PDF**
-- **Im?genes (PNG, JPG, WebP) a PDF**
-- **PDF a Markdown / Texto**
-- **HTML a PDF**
-- **JSON / CSV a Excel (.xlsx)**
+👉 **Accede a la app en vivo:** [https://converter-blue-one.vercel.app](https://converter-blue-one.vercel.app)
 
 ---
 
-## ?? Integraci?n para Inteligencias Artificiales y Scripts
+## 🚀 Módulos de Conversión Activos
 
-### REST API
+| # | Módulo | Entrada | Salida | Descripción |
+| :-: | :--- | :--- | :--- | :--- |
+| **1** | **Markdown (.md) a PDF** | `.md`, `.markdown` | PDF de alta resolución | Renderizado estilo hoja de papel con fórmulas KaTeX ($LaTeX$), resaltado de código (190+ lenguajes) y 5 temas. |
+| **2** | **Word (.docx) a PDF** | `.docx` (Word) | PDF estructurado | Conversión fiel de documentos Word preservando tablas, listas, encabezados, estilos e imágenes. |
+| **3** | **Imágenes a PDF** | PNG, JPG, WebP, GIF, SVG | PDF combinado | Agrupa una o múltiples fotos en un único documento PDF de alta calidad con autoajuste de proporciones. |
+| **4** | **PDF a Markdown** | `.pdf` | `.md` (Markdown) | Extracción de texto y estructura completa a formato Markdown limpio con editor y descarga inmediata. |
+| **5** | **HTML a PDF** | Código HTML o archivos `.html` | PDF con CSS | Editor y renderizado en tiempo real de código HTML completo a PDF. |
+| **6** | **JSON / CSV a Excel** | `.json`, `.csv` | Libro Excel (`.xlsx`) | Conversión de conjuntos de datos y tablas a archivos de hoja de cálculo Excel reales con vista previa. |
+
+---
+
+## 🤖 Integración para Inteligencias Artificiales y Scripts
+
+### cURL
 ```bash
 curl -X POST https://converter-blue-one.vercel.app/api/convert \
   -H "Content-Type: application/json" \
-  -d '{"markdown": "# Reporte Autom?tico\nGenerado por IA.", "theme": "executive"}' \
+  -d '{"markdown": "# Mi Reporte\nGenerado por IA.", "theme": "executive"}' \
   --output reporte.pdf
 ```
 
@@ -50,7 +43,7 @@ import requests
 
 url = "https://converter-blue-one.vercel.app/api/convert"
 data = {
-    "markdown": "# Documento T?cnico\nContenido generado din?micamente.",
+    "markdown": "# Documento Técnico\nContenido generado dinámicamente.",
     "theme": "academic",
     "format": "A4"
 }
@@ -61,7 +54,7 @@ with open("documento.pdf", "wb") as f:
 
 ---
 
-## ?? Ejecuci?n Local
+## 💻 Ejecución Local
 
 1. Clona el repositorio:
    ```bash
@@ -72,7 +65,7 @@ with open("documento.pdf", "wb") as f:
    ```bash
    npm install
    ```
-3. Inicia la aplicaci?n:
+3. Inicia la aplicación:
    ```bash
    npm start
    ```
@@ -80,15 +73,16 @@ with open("documento.pdf", "wb") as f:
 
 ---
 
-## ?? Contribuciones y Seguridad
+## 🤝 Contribuciones y Seguridad
 
-Las contribuciones de la comunidad son bienvenidas. Por motivos de seguridad y prevenci?n de c?digo malicioso:
+Las contribuciones de la comunidad son bienvenidas. Por motivos estrictos de seguridad e integridad del código:
 - **No se permiten `pushes` directos a la rama principal (`main`)**.
-- Todas las mejoras deben ser propuestas a trav?s de un **Pull Request (PR)**.
-- Consulta nuestra [Gu?a de Contribuci?n (CONTRIBUTING.md)](CONTRIBUTING.md) y nuestra [Pol?tica de Seguridad (SECURITY.md)](SECURITY.md) para m?s detalles.
+- Todas las mejoras deben ser propuestas a través de un **Pull Request (PR)**.
+- Solo el propietario del repositorio puede aprobar y fusionar (`merge`) cambios.
+- Consulta nuestra [Guía de Contribución (CONTRIBUTING.md)](CONTRIBUTING.md) y nuestra [Política de Seguridad (SECURITY.md)](SECURITY.md).
 
 ---
 
-## ?? Licencia
+## 📄 Licencia
 
-Distribuido bajo la Licencia MIT. Consulta el archivo [LICENSE](LICENSE) para m?s informaci?n.
+Distribuido bajo la Licencia MIT. Consulta el archivo [LICENSE](LICENSE) para más información.

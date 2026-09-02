@@ -1,15 +1,15 @@
-## ?? Descripci?n del Cambio
-<!-- Explica de forma clara y concisa qu? agrega o corrige este Pull Request -->
+## 📝 Descripción del Cambio
+<!-- Explica de forma clara y concisa qué agrega o corrige este Pull Request -->
 
-## ?? Tipo de Cambio
-- [ ] ?? Nueva funcionalidad (nuevo formato de conversi?n, dashboard, etc.)
-- [ ] ?? Correcci?n de error (Bug fix)
-- [ ] ?? Mejora de dise?o o interfaz (UI/UX)
-- [ ] ?? Documentaci?n
-- [ ] ? Optimizaci?n de rendimiento
+## 🎯 Tipo de Cambio
+- [ ] 🚀 Nueva funcionalidad
+- [ ] 🐛 Corrección de error (Bug fix)
+- [ ] 💅 Mejora de diseño o interfaz (UI/UX)
+- [ ] 📚 Documentación
+- [ ] ⚡ Optimización de rendimiento
 
-## ??? Lista de Verificaci?n de Seguridad y Calidad
-- [ ] No se a?adieron dependencias maliciosas ni scripts de instalaci?n sospechosos.
-- [ ] El c?digo pasa la verificaci?n de sintaxis (`node --check`).
+## 🛡️ Lista de Verificación de Seguridad y Calidad
+- [ ] No se añadieron dependencias maliciosas ni scripts de instalación sospechosos.
+- [ ] El código pasa la verificación de sintaxis (`node --check`).
 - [ ] He probado los cambios localmente en mi navegador y funcionan como se espera.
 - [ ] No se exponen credenciales, tokens ni datos sensibles.
