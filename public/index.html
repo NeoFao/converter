@@ -12,6 +12,9 @@
     }
   </script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Client-side PDF and ZIP engines -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-full flex flex-col font-sans">
@@ -59,7 +62,7 @@
           </button>
         </div>
 
-        <!-- Server Status Badge -->
+        <!-- Cloud Status Badge -->
         <div class="hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium">
           <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
           <span id="server-status-text">Online</span>
@@ -72,9 +75,7 @@
   <!-- Main Content Container -->
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-    <!-- ========================================== -->
-    <!-- VIEW 1: MAIN CONVERTER SUITE DASHBOARD     -->
-    <!-- ========================================== -->
+    <!-- VIEW 1: DASHBOARD -->
     <div id="view-dashboard" class="space-y-8">
       
       <!-- Welcome Hero Banner -->
@@ -129,17 +130,11 @@
               <div class="w-12 h-12 rounded-xl bg-blue-600/10 text-blue-400 flex items-center justify-center text-2xl">
                 <i class="fa-regular fa-file-word"></i>
               </div>
-              <span class="px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-400 text-xs font-medium border border-slate-700">
-                Pr&oacute;ximamente
-              </span>
+              <span class="px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-400 text-xs font-medium border border-slate-700">Pr&oacute;ximamente</span>
             </div>
             <h3 class="text-lg font-bold text-slate-300">Word (.docx) a PDF</h3>
-            <p class="text-xs text-slate-500 mt-2 leading-relaxed">
-              Convierte documentos de Word (.docx, .doc) a formato PDF preservando fuentes, formatos e im&aacute;genes.
-            </p>
-            <div class="mt-5 pt-4 border-t border-slate-800/60 flex items-center text-xs text-slate-500">
-              <span>En desarrollo</span>
-            </div>
+            <p class="text-xs text-slate-500 mt-2 leading-relaxed">Convierte documentos de Word (.docx, .doc) a formato PDF preservando fuentes, formatos e im&aacute;genes.</p>
+            <div class="mt-5 pt-4 border-t border-slate-800/60 flex items-center text-xs text-slate-500"><span>En desarrollo</span></div>
           </div>
 
           <!-- CARD 3: IMAGENES A PDF (COMING SOON) -->
@@ -148,17 +143,11 @@
               <div class="w-12 h-12 rounded-xl bg-amber-600/10 text-amber-400 flex items-center justify-center text-2xl">
                 <i class="fa-regular fa-images"></i>
               </div>
-              <span class="px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-400 text-xs font-medium border border-slate-700">
-                Pr&oacute;ximamente
-              </span>
+              <span class="px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-400 text-xs font-medium border border-slate-700">Pr&oacute;ximamente</span>
             </div>
             <h3 class="text-lg font-bold text-slate-300">Im&aacute;genes a PDF</h3>
-            <p class="text-xs text-slate-500 mt-2 leading-relaxed">
-              Combina m&uacute;ltiples im&aacute;genes (PNG, JPG, WebP) en un &uacute;nico archivo PDF de alta resoluci&oacute;n.
-            </p>
-            <div class="mt-5 pt-4 border-t border-slate-800/60 flex items-center text-xs text-slate-500">
-              <span>En desarrollo</span>
-            </div>
+            <p class="text-xs text-slate-500 mt-2 leading-relaxed">Combina m&uacute;ltiples im&aacute;genes (PNG, JPG, WebP) en un &uacute;nico archivo PDF de alta resoluci&oacute;n.</p>
+            <div class="mt-5 pt-4 border-t border-slate-800/60 flex items-center text-xs text-slate-500"><span>En desarrollo</span></div>
           </div>
 
           <!-- CARD 4: PDF A MARKDOWN (COMING SOON) -->
@@ -167,17 +156,11 @@
               <div class="w-12 h-12 rounded-xl bg-purple-600/10 text-purple-400 flex items-center justify-center text-2xl">
                 <i class="fa-solid fa-file-invoice"></i>
               </div>
-              <span class="px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-400 text-xs font-medium border border-slate-700">
-                Pr&oacute;ximamente
-              </span>
+              <span class="px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-400 text-xs font-medium border border-slate-700">Pr&oacute;ximamente</span>
             </div>
             <h3 class="text-lg font-bold text-slate-300">PDF a Markdown</h3>
-            <p class="text-xs text-slate-500 mt-2 leading-relaxed">
-              Extrae texto, tablas y encabezados de un archivo PDF y convi&eacute;rtelos a formato Markdown limpio.
-            </p>
-            <div class="mt-5 pt-4 border-t border-slate-800/60 flex items-center text-xs text-slate-500">
-              <span>En desarrollo</span>
-            </div>
+            <p class="text-xs text-slate-500 mt-2 leading-relaxed">Extrae texto, tablas y encabezados de un archivo PDF y convi&eacute;rtelos a formato Markdown limpio.</p>
+            <div class="mt-5 pt-4 border-t border-slate-800/60 flex items-center text-xs text-slate-500"><span>En desarrollo</span></div>
           </div>
 
           <!-- CARD 5: HTML A PDF (COMING SOON) -->
@@ -186,17 +169,11 @@
               <div class="w-12 h-12 rounded-xl bg-rose-600/10 text-rose-400 flex items-center justify-center text-2xl">
                 <i class="fa-brands fa-html5"></i>
               </div>
-              <span class="px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-400 text-xs font-medium border border-slate-700">
-                Pr&oacute;ximamente
-              </span>
+              <span class="px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-400 text-xs font-medium border border-slate-700">Pr&oacute;ximamente</span>
             </div>
             <h3 class="text-lg font-bold text-slate-300">HTML a PDF</h3>
-            <p class="text-xs text-slate-500 mt-2 leading-relaxed">
-              Renderiza p&aacute;ginas web y c&oacute;digo HTML completo con CSS a documentos PDF de alta precisi&oacute;n.
-            </p>
-            <div class="mt-5 pt-4 border-t border-slate-800/60 flex items-center text-xs text-slate-500">
-              <span>En desarrollo</span>
-            </div>
+            <p class="text-xs text-slate-500 mt-2 leading-relaxed">Renderiza p&aacute;ginas web y c&oacute;digo HTML completo con CSS a documentos PDF de alta precisi&oacute;n.</p>
+            <div class="mt-5 pt-4 border-t border-slate-800/60 flex items-center text-xs text-slate-500"><span>En desarrollo</span></div>
           </div>
 
           <!-- CARD 6: JSON / CSV A EXCEL (COMING SOON) -->
@@ -205,17 +182,11 @@
               <div class="w-12 h-12 rounded-xl bg-teal-600/10 text-teal-400 flex items-center justify-center text-2xl">
                 <i class="fa-regular fa-file-excel"></i>
               </div>
-              <span class="px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-400 text-xs font-medium border border-slate-700">
-                Pr&oacute;ximamente
-              </span>
+              <span class="px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-400 text-xs font-medium border border-slate-700">Pr&oacute;ximamente</span>
             </div>
             <h3 class="text-lg font-bold text-slate-300">JSON / CSV a Excel</h3>
-            <p class="text-xs text-slate-500 mt-2 leading-relaxed">
-              Convierte conjuntos de datos en hojas de c&aacute;lculo .xlsx organizadas autom&aacute;ticamente.
-            </p>
-            <div class="mt-5 pt-4 border-t border-slate-800/60 flex items-center text-xs text-slate-500">
-              <span>En desarrollo</span>
-            </div>
+            <p class="text-xs text-slate-500 mt-2 leading-relaxed">Convierte conjuntos de datos en hojas de c&aacute;lculo .xlsx organizadas autom&aacute;ticamente.</p>
+            <div class="mt-5 pt-4 border-t border-slate-800/60 flex items-center text-xs text-slate-500"><span>En desarrollo</span></div>
           </div>
 
         </div>
@@ -223,15 +194,27 @@
 
     </div>
 
-    <!-- ========================================== -->
-    <!-- VIEW 2: MARKDOWN TO PDF CONVERTER TOOL     -->
-    <!-- ========================================== -->
+    <!-- VIEW 2: MARKDOWN TOOL -->
     <div id="view-tool-markdown" class="space-y-6 hidden">
       
-      <!-- Sub-Tab 1: FILES UPLOAD -->
+      <!-- Top back bar -->
+      <div class="flex items-center justify-between bg-slate-900/80 border border-slate-800 p-4 rounded-2xl">
+        <div class="flex items-center space-x-3">
+          <button onclick="goToDashboard()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center space-x-1.5 transition border border-slate-700">
+            <i class="fa-solid fa-arrow-left"></i>
+            <span>Dashboard</span>
+          </button>
+          <div class="h-4 w-px bg-slate-700"></div>
+          <span class="text-sm font-bold text-white flex items-center space-x-2">
+            <i class="fa-brands fa-markdown text-indigo-400 text-base"></i>
+            <span>Conversor de Markdown (.md) a PDF</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- SUBTAB 1: FILES UPLOAD -->
       <div id="tool-subtab-files" class="space-y-6">
 
-        <!-- Configuration Card -->
         <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl">
           <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4 flex items-center space-x-2">
             <i class="fa-solid fa-sliders text-indigo-400"></i>
@@ -257,10 +240,10 @@
               <label class="block text-xs font-medium text-slate-300 mb-2">Tama&ntilde;o de Hoja</label>
               <div class="relative">
                 <select id="config-format" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none pr-10 cursor-pointer">
-                  <option value="A4" selected>A4 (210 x 297 mm)</option>
-                  <option value="Letter">Carta / US Letter (8.5 x 11 in)</option>
-                  <option value="Legal">Legal / Oficio</option>
-                  <option value="A3">A3 (Doble A4)</option>
+                  <option value="a4" selected>A4 (210 x 297 mm)</option>
+                  <option value="letter">Carta / US Letter (8.5 x 11 in)</option>
+                  <option value="legal">Legal / Oficio</option>
+                  <option value="a3">A3 (Doble A4)</option>
                 </select>
                 <i class="fa-solid fa-chevron-down absolute right-3.5 top-3.5 text-slate-500 pointer-events-none text-xs"></i>
               </div>
@@ -270,9 +253,9 @@
               <label class="block text-xs font-medium text-slate-300 mb-2">M&aacute;rgenes</label>
               <div class="relative">
                 <select id="config-margin" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none pr-10 cursor-pointer">
-                  <option value="normal" selected>Normal (18 mm)</option>
+                  <option value="normal" selected>Normal (15 mm)</option>
                   <option value="compact">Compacto (10 mm)</option>
-                  <option value="wide">Amplio (25 mm)</option>
+                  <option value="wide">Amplio (22 mm)</option>
                   <option value="none">Sin M&aacute;rgenes (0 mm)</option>
                 </select>
                 <i class="fa-solid fa-chevron-down absolute right-3.5 top-3.5 text-slate-500 pointer-events-none text-xs"></i>
@@ -281,16 +264,12 @@
 
             <div class="flex flex-col justify-end space-y-2.5">
               <label class="flex items-center space-x-2.5 cursor-pointer text-xs font-medium text-slate-300 select-none">
-                <input type="checkbox" id="config-header-footer" checked class="w-4 h-4 rounded bg-slate-950 border-slate-700 text-indigo-600 focus:ring-indigo-500">
-                <span>Encabezado y N&uacute;mero de P&aacute;gina</span>
-              </label>
-              <label class="flex items-center space-x-2.5 cursor-pointer text-xs font-medium text-slate-300 select-none">
                 <input type="checkbox" id="config-landscape" class="w-4 h-4 rounded bg-slate-950 border-slate-700 text-indigo-600 focus:ring-indigo-500">
                 <span>Orientaci&oacute;n Horizontal (Landscape)</span>
               </label>
               <label class="flex items-center space-x-2.5 cursor-pointer text-xs font-medium text-slate-300 select-none">
                 <input type="checkbox" id="config-merge" class="w-4 h-4 rounded bg-slate-950 border-slate-700 text-indigo-600 focus:ring-indigo-500">
-                <span class="text-indigo-300 font-semibold">Combinar todos en un &uacute;nico PDF</span>
+                <span class="text-indigo-300 font-semibold">Descargar lote en ZIP</span>
               </label>
             </div>
           </div>
@@ -339,7 +318,7 @@
           <div class="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-xl">
             <div class="flex items-center space-x-3 text-xs text-slate-400">
               <i class="fa-solid fa-shield-halved text-indigo-400 text-base"></i>
-              <span>Conversi&oacute;n segura y directa. Tus archivos se procesan con m&aacute;xima privacidad.</span>
+              <span>Conversi&oacute;n instant&aacute;nea y segura en tu navegador. Privacidad total.</span>
             </div>
 
             <button id="btn-convert-all" onclick="handleBatchConvert()" class="w-full sm:w-auto px-7 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-600/30 flex items-center justify-center space-x-2.5 transition transform active:scale-95">
@@ -351,7 +330,7 @@
 
       </div>
 
-      <!-- Sub-Tab 2: QUICK PASTE / EDITOR -->
+      <!-- SUBTAB 2: EDITOR -->
       <div id="tool-subtab-editor" class="hidden space-y-6">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[760px]">
           <div class="flex flex-col bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
@@ -402,7 +381,7 @@
         </div>
       </div>
 
-      <!-- Sub-Tab 3: AI & API GUIDE -->
+      <!-- SUBTAB 3: AI GUIDE -->
       <div id="tool-subtab-ai" class="hidden space-y-6">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
           <div>
@@ -421,29 +400,6 @@
               <div class="text-emerald-400">node cli.js documento.md -o salida.pdf</div>
               <div class="text-slate-500 mt-2"># Convertir con tema ejecutivo y formato Carta</div>
               <div class="text-emerald-400">node cli.js reporte.md --theme executive --format Letter</div>
-            </div>
-          </div>
-          <div class="space-y-3">
-            <h3 class="text-xs font-bold text-indigo-400 uppercase tracking-wider flex items-center space-x-2"><i class="fa-solid fa-network-wired"></i><span>2. REST API (Endpoint POST /api/convert)</span></h3>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-2">
-                <span class="text-xs font-semibold text-slate-400">cURL</span>
-                <pre class="text-xs font-mono text-emerald-400 overflow-x-auto">curl -X POST https://md-to-pdf-converter-fawn.vercel.app/api/convert   -H "Content-Type: application/json"   -d '{"markdown": "# Mi Titulo
-Texto de prueba", "theme": "executive"}'   --output mi_documento.pdf</pre>
-              </div>
-              <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-2">
-                <span class="text-xs font-semibold text-slate-400">Python</span>
-                <pre class="text-xs font-mono text-indigo-300 overflow-x-auto">import requests
-
-res = requests.post("https://md-to-pdf-converter-fawn.vercel.app/api/convert", json={
-    "markdown": "# Reporte Autom?tico
-Generado por IA.",
-    "theme": "academic",
-    "format": "A4"
-})
-with open("reporte.pdf", "wb") as f:
-    f.write(res.content)</pre>
-              </div>
             </div>
           </div>
         </div>
@@ -465,8 +421,11 @@ with open("reporte.pdf", "wb") as f:
             <span id="modal-zoom-label" class="text-xs px-2 font-mono text-indigo-300 select-none">100%</span>
             <button onclick="changeModalZoom(0.1)" title="Acercar" class="px-2.5 py-1 text-xs text-slate-300 hover:text-white hover:bg-slate-700 transition"><i class="fa-solid fa-plus"></i></button>
           </div>
+          <button id="modal-btn-print" onclick="printActiveModalFrame()" class="text-xs px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium flex items-center space-x-1.5 transition border border-slate-700">
+            <i class="fa-solid fa-print"></i><span>Imprimir / PDF</span>
+          </button>
           <button id="modal-btn-download" onclick="downloadActiveModalFile()" class="text-xs px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-medium flex items-center space-x-1.5 transition shadow-lg shadow-indigo-600/25">
-            <i class="fa-solid fa-download"></i><span>Exportar PDF</span>
+            <i class="fa-solid fa-download"></i><span>Descargar PDF</span>
           </button>
           <button onclick="closeModal()" class="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-800 transition"><i class="fa-solid fa-xmark text-base"></i></button>
         </div>

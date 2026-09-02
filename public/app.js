@@ -1,6 +1,6 @@
 // State Management
-let currentTool = 'dashboard'; // 'dashboard' or 'markdown'
-let currentSubTab = 'files'; // 'files', 'editor', 'ai'
+let currentTool = 'dashboard';
+let currentSubTab = 'files';
 let fileQueue = [];
 let activePreviewFile = null;
 let editorDebounceTimeout = null;
@@ -8,7 +8,7 @@ let cachedSampleMarkdown = '';
 let currentZoom = 1.0;
 let currentModalZoom = 1.0;
 
-// Fetch sample markdown from server
+// Fetch sample markdown
 async function getSampleMarkdown() {
   if (cachedSampleMarkdown) return cachedSampleMarkdown;
   try {
@@ -18,12 +18,12 @@ async function getSampleMarkdown() {
       return cachedSampleMarkdown;
     }
   } catch (e) {
-    console.warn('No se pudo cargar el archivo de ejemplo del servidor');
+    console.warn('Fallback sample');
   }
   return '# Documento de Prueba\n\nEste es un documento Markdown de prueba.';
 }
 
-// --- Navigation / Dashboard View Controllers ---
+// --- Navigation View Controllers ---
 window.goToDashboard = function() {
   currentTool = 'dashboard';
   const viewDashboard = document.getElementById('view-dashboard');
@@ -122,7 +122,72 @@ function applyZoomToFrame(frameId, zoomLevel) {
       body.style.zoom = zoomLevel;
     }
   } catch (e) {
-    console.warn('No se pudo aplicar zoom', e);
+    console.warn('Zoom error', e);
+  }
+}
+
+// --- Client-Side PDF Generation Engine ---
+async function generateClientPdf(markdownText, filename, options = {}) {
+  // 1. Fetch styled HTML from preview endpoint
+  let html = '';
+  try {
+    const res = await fetch('/api/preview', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        markdown: markdownText,
+        theme: options.theme || 'github',
+        title: filename
+      })
+    });
+    if (res.ok) {
+      html = await res.text();
+    }
+  } catch (e) {
+    console.warn('API error', e);
+  }
+
+  if (!html) {
+    throw new Error('No se pudo renderizar el contenido.');
+  }
+
+  // 2. Create offscreen container
+  const tempDiv = document.createElement('div');
+  tempDiv.style.position = 'fixed';
+  tempDiv.style.left = '-9999px';
+  tempDiv.style.top = '0';
+  tempDiv.style.width = options.landscape ? '1120px' : '820px';
+  tempDiv.style.backgroundColor = options.theme === 'dark' ? '#0f172a' : '#ffffff';
+  tempDiv.innerHTML = html;
+  document.body.appendChild(tempDiv);
+
+  const elementToRender = tempDiv.querySelector('.markdown-body') || tempDiv;
+
+  const format = (options.format || 'a4').toLowerCase();
+  const orientation = options.landscape ? 'landscape' : 'portrait';
+  let marginVal = 14;
+  if (options.margin === 'compact') marginVal = 8;
+  if (options.margin === 'wide') marginVal = 20;
+  if (options.margin === 'none') marginVal = 0;
+
+  const opt = {
+    margin: [marginVal, marginVal, marginVal, marginVal],
+    filename: filename.endsWith('.pdf') ? filename : filename + '.pdf',
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true, logging: false },
+    jsPDF: { unit: 'mm', format: format, orientation: orientation },
+    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+  };
+
+  try {
+    if (options.returnBlob) {
+      const blob = await html2pdf().set(opt).from(elementToRender).output('blob');
+      return blob;
+    } else {
+      await html2pdf().set(opt).from(elementToRender).save();
+    }
+  } finally {
+    document.body.removeChild(tempDiv);
   }
 }
 
@@ -228,7 +293,7 @@ function renderFileList() {
         <button onclick="previewFile('${item.id}')" title="Vista Previa" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition">
           <i class="fa-regular fa-eye"></i>
         </button>
-        <button onclick="convertSingleFile('${item.id}')" title="Convertir a PDF" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center space-x-1.5 transition">
+        <button onclick="convertSingleFile('${item.id}')" title="Descargar PDF" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center space-x-1.5 transition">
           <i class="fa-solid fa-file-arrow-down"></i>
           <span>PDF</span>
         </button>
@@ -298,6 +363,14 @@ window.closeModal = function() {
   activePreviewFile = null;
 };
 
+window.printActiveModalFrame = function() {
+  const frame = document.getElementById('modal-preview-frame');
+  if (frame && frame.contentWindow) {
+    frame.contentWindow.focus();
+    frame.contentWindow.print();
+  }
+};
+
 window.downloadActiveModalFile = function() {
   if (activePreviewFile) {
     convertSingleFile(activePreviewFile.id);
@@ -316,35 +389,15 @@ window.convertSingleFile = async function(id) {
   const formatEl = document.getElementById('config-format');
   const marginEl = document.getElementById('config-margin');
   const landscapeEl = document.getElementById('config-landscape');
-  const headerFooterEl = document.getElementById('config-header-footer');
 
   try {
-    const res = await fetch('/api/convert', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        markdown: item.text,
-        title: item.name.replace(/\.[^/.]+$/, ''),
-        theme: themeEl ? themeEl.value : 'github',
-        format: formatEl ? formatEl.value : 'A4',
-        margin: marginEl ? marginEl.value : 'normal',
-        landscape: landscapeEl ? landscapeEl.checked : false,
-        headerFooter: headerFooterEl ? headerFooterEl.checked : true
-      })
+    const baseName = item.name.replace(/\.[^/.]+$/, '');
+    await generateClientPdf(item.text, baseName + '.pdf', {
+      theme: themeEl ? themeEl.value : 'github',
+      format: formatEl ? formatEl.value : 'a4',
+      margin: marginEl ? marginEl.value : 'normal',
+      landscape: landscapeEl ? landscapeEl.checked : false
     });
-
-    if (!res.ok) throw new Error('Error en el servidor al convertir');
-
-    const blob = await res.blob();
-    const downloadUrl = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = downloadUrl;
-    a.download = item.name.replace(/\.[^/.]+$/, '') + '.pdf';
-    document.body.appendChild(a);
-    a.click();
-    window.URL.revokeObjectURL(downloadUrl);
-    a.remove();
-
     item.status = 'done';
   } catch (err) {
     console.error(err);
@@ -359,8 +412,6 @@ window.convertSingleFile = async function(id) {
 window.handleBatchConvert = async function() {
   if (fileQueue.length === 0) return;
 
-  const mergeEl = document.getElementById('config-merge');
-  const isMerge = mergeEl ? mergeEl.checked : false;
   const btn = document.getElementById('btn-convert-all');
   const btnText = document.getElementById('btn-convert-all-text');
 
@@ -377,42 +428,50 @@ window.handleBatchConvert = async function() {
   const formatEl = document.getElementById('config-format');
   const marginEl = document.getElementById('config-margin');
   const landscapeEl = document.getElementById('config-landscape');
-  const headerFooterEl = document.getElementById('config-header-footer');
+  const isZip = true;
 
   try {
-    const formData = new FormData();
-    fileQueue.forEach(item => {
-      formData.append('files', item.file);
-    });
+    if (fileQueue.length === 1) {
+      // Single file direct download
+      const item = fileQueue[0];
+      const baseName = item.name.replace(/\.[^/.]+$/, '');
+      await generateClientPdf(item.text, baseName + '.pdf', {
+        theme: themeEl ? themeEl.value : 'github',
+        format: formatEl ? formatEl.value : 'a4',
+        margin: marginEl ? marginEl.value : 'normal',
+        landscape: landscapeEl ? landscapeEl.checked : false
+      });
+      item.status = 'done';
+    } else {
+      // Multiple files -> Bundle in ZIP
+      const zip = new JSZip();
+      for (const item of fileQueue) {
+        const baseName = item.name.replace(/\.[^/.]+$/, '');
+        const pdfBlob = await generateClientPdf(item.text, baseName + '.pdf', {
+          theme: themeEl ? themeEl.value : 'github',
+          format: formatEl ? formatEl.value : 'a4',
+          margin: marginEl ? marginEl.value : 'normal',
+          landscape: landscapeEl ? landscapeEl.checked : false,
+          returnBlob: true
+        });
+        zip.file(baseName + '.pdf', pdfBlob);
+        item.status = 'done';
+        renderFileList();
+      }
 
-    formData.append('theme', themeEl ? themeEl.value : 'github');
-    formData.append('format', formatEl ? formatEl.value : 'A4');
-    formData.append('margin', marginEl ? marginEl.value : 'normal');
-    formData.append('landscape', landscapeEl ? landscapeEl.checked : false);
-    formData.append('headerFooter', headerFooterEl ? headerFooterEl.checked : true);
-    formData.append('merge', isMerge);
-
-    const res = await fetch('/api/convert-batch', {
-      method: 'POST',
-      body: formData
-    });
-
-    if (!res.ok) throw new Error('Error al procesar lote');
-
-    const blob = await res.blob();
-    const downloadUrl = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = downloadUrl;
-    a.download = isMerge ? 'documentos_combinados.pdf' : 'documentos_pdf.zip';
-    document.body.appendChild(a);
-    a.click();
-    window.URL.revokeObjectURL(downloadUrl);
-    a.remove();
-
-    fileQueue.forEach(f => f.status = 'done');
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      const downloadUrl = window.URL.createObjectURL(zipBlob);
+      const a = document.createElement('a');
+      a.href = downloadUrl;
+      a.download = 'documentos_pdf.zip';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(downloadUrl);
+      a.remove();
+    }
   } catch (err) {
     console.error(err);
-    alert('Error durante la conversi?n en lote: ' + err.message);
+    alert('Error durante la conversi?n: ' + err.message);
     fileQueue.forEach(f => f.status = 'error');
   } finally {
     if (btn) {
@@ -451,7 +510,6 @@ window.convertFromEditor = async function() {
   const formatEl = document.getElementById('config-format');
   const marginEl = document.getElementById('config-margin');
   const landscapeEl = document.getElementById('config-landscape');
-  const headerFooterEl = document.getElementById('config-header-footer');
 
   const markdown = textarea ? textarea.value.trim() : '';
   if (!markdown) {
@@ -463,31 +521,12 @@ window.convertFromEditor = async function() {
   if (btnText) btnText.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1.5"></i>Generando...';
 
   try {
-    const res = await fetch('/api/convert', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        markdown,
-        title: 'Documento_Editor',
-        theme: themeEl ? themeEl.value : 'github',
-        format: formatEl ? formatEl.value : 'A4',
-        margin: marginEl ? marginEl.value : 'normal',
-        landscape: landscapeEl ? landscapeEl.checked : false,
-        headerFooter: headerFooterEl ? headerFooterEl.checked : true
-      })
+    await generateClientPdf(markdown, 'Documento_Editor.pdf', {
+      theme: themeEl ? themeEl.value : 'github',
+      format: formatEl ? formatEl.value : 'a4',
+      margin: marginEl ? marginEl.value : 'normal',
+      landscape: landscapeEl ? landscapeEl.checked : false
     });
-
-    if (!res.ok) throw new Error('Error al generar PDF');
-
-    const blob = await res.blob();
-    const downloadUrl = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = downloadUrl;
-    a.download = 'Documento_Editor.pdf';
-    document.body.appendChild(a);
-    a.click();
-    window.URL.revokeObjectURL(downloadUrl);
-    a.remove();
   } catch (err) {
     alert('Error al generar PDF: ' + err.message);
   } finally {
@@ -514,7 +553,7 @@ async function updateEditorPreview() {
 
   const markdown = textarea.value.trim();
   if (!markdown) {
-    frame.srcdoc = '<p style="font-family:sans-serif;color:#94a3b8;padding:24px;text-align:center;">Escribe Markdown a la izquierda para ver la vista previa en vivo aqu?.</p>';
+    frame.srcdoc = '<p style="font-family:sans-serif;color:#94a3b8;padding:24px;text-align:center;">Escribe Markdown a la izquierda para ver la vista previa en vivo aqu&iacute;.</p>';
     return;
   }
 
@@ -543,7 +582,7 @@ async function checkServerHealth() {
       badge.textContent = 'Online';
     }
   } catch (err) {
-    console.warn('Servidor offline');
+    console.warn('Offline');
   }
 }
 
