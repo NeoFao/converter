@@ -1,4 +1,6 @@
 // State Management
+let currentTool = 'dashboard'; // 'dashboard' or 'markdown'
+let currentSubTab = 'files'; // 'files', 'editor', 'ai'
 let fileQueue = [];
 let activePreviewFile = null;
 let editorDebounceTimeout = null;
@@ -21,58 +23,52 @@ async function getSampleMarkdown() {
   return '# Documento de Prueba\n\nEste es un documento Markdown de prueba.';
 }
 
-// --- Sync Theme Dropdowns ---
-window.syncTheme = function(themeName) {
-  const configSelect = document.getElementById('config-theme');
-  const previewSelect = document.getElementById('preview-theme-select');
-  if (configSelect) configSelect.value = themeName;
-  if (previewSelect) previewSelect.value = themeName;
-  updateEditorPreview();
+// --- Navigation / Dashboard View Controllers ---
+window.goToDashboard = function() {
+  currentTool = 'dashboard';
+  const viewDashboard = document.getElementById('view-dashboard');
+  const viewMarkdown = document.getElementById('view-tool-markdown');
+  const btnNavDashboard = document.getElementById('btn-nav-dashboard');
+  const mdToolTabs = document.getElementById('md-tool-tabs');
+
+  if (viewDashboard) viewDashboard.classList.remove('hidden');
+  if (viewMarkdown) viewMarkdown.classList.add('hidden');
+  if (btnNavDashboard) btnNavDashboard.classList.add('hidden');
+  if (mdToolTabs) mdToolTabs.classList.add('hidden');
 };
 
-// --- Zoom Controls ---
-window.changeZoom = function(delta) {
-  currentZoom = Math.max(0.5, Math.min(1.8, Math.round((currentZoom + delta) * 10) / 10));
-  const label = document.getElementById('preview-zoom-label');
-  if (label) label.textContent = `${Math.round(currentZoom * 100)}%`;
-  applyZoomToFrame('editor-preview-frame', currentZoom);
-};
+window.openTool = function(toolName) {
+  if (toolName === 'markdown') {
+    currentTool = 'markdown';
+    const viewDashboard = document.getElementById('view-dashboard');
+    const viewMarkdown = document.getElementById('view-tool-markdown');
+    const btnNavDashboard = document.getElementById('btn-nav-dashboard');
+    const mdToolTabs = document.getElementById('md-tool-tabs');
 
-window.changeModalZoom = function(delta) {
-  currentModalZoom = Math.max(0.5, Math.min(1.8, Math.round((currentModalZoom + delta) * 10) / 10));
-  const label = document.getElementById('modal-zoom-label');
-  if (label) label.textContent = `${Math.round(currentModalZoom * 100)}%`;
-  applyZoomToFrame('modal-preview-frame', currentModalZoom);
-};
+    if (viewDashboard) viewDashboard.classList.add('hidden');
+    if (viewMarkdown) viewMarkdown.classList.remove('hidden');
+    if (btnNavDashboard) btnNavDashboard.classList.remove('hidden');
+    if (mdToolTabs) mdToolTabs.classList.remove('hidden');
 
-function applyZoomToFrame(frameId, zoomLevel) {
-  const frame = document.getElementById(frameId);
-  if (!frame || !frame.contentDocument) return;
-  try {
-    const body = frame.contentDocument.body;
-    if (body) {
-      body.style.zoom = zoomLevel;
-    }
-  } catch (e) {
-    console.warn('No se pudo aplicar zoom al iframe', e);
+    switchToolTab('files');
   }
-}
+};
 
-// --- Global Tab Switcher ---
-window.switchTab = function(tabName) {
+window.switchToolTab = function(tabName) {
+  currentSubTab = tabName;
   const tabs = [
-    { id: 'files', btn: document.getElementById('tab-btn-files'), pane: document.getElementById('tab-content-files') },
-    { id: 'editor', btn: document.getElementById('tab-btn-editor'), pane: document.getElementById('tab-content-editor') },
-    { id: 'ai', btn: document.getElementById('tab-btn-ai'), pane: document.getElementById('tab-content-ai') }
+    { id: 'files', btn: document.getElementById('tab-btn-files'), pane: document.getElementById('tool-subtab-files') },
+    { id: 'editor', btn: document.getElementById('tab-btn-editor'), pane: document.getElementById('tool-subtab-editor') },
+    { id: 'ai', btn: document.getElementById('tab-btn-ai'), pane: document.getElementById('tool-subtab-ai') }
   ];
 
   tabs.forEach(t => {
     if (!t.btn || !t.pane) return;
     if (t.id === tabName) {
-      t.btn.className = 'tab-btn active px-4 py-2 rounded-lg text-xs font-semibold flex items-center space-x-2 transition-all bg-indigo-600 text-white shadow-md shadow-indigo-600/30';
+      t.btn.className = 'tab-btn active px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-2 transition-all bg-indigo-600 text-white shadow-md shadow-indigo-600/30';
       t.pane.classList.remove('hidden');
     } else {
-      t.btn.className = 'tab-btn px-4 py-2 rounded-lg text-xs font-semibold flex items-center space-x-2 transition-all text-slate-400 hover:text-white';
+      t.btn.className = 'tab-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-2 transition-all text-slate-400 hover:text-white';
       t.pane.classList.add('hidden');
     }
   });
@@ -92,6 +88,43 @@ window.switchTab = function(tabName) {
     }
   }
 };
+
+// --- Sync Theme Dropdowns ---
+window.syncTheme = function(themeName) {
+  const configSelect = document.getElementById('config-theme');
+  const previewSelect = document.getElementById('preview-theme-select');
+  if (configSelect) configSelect.value = themeName;
+  if (previewSelect) previewSelect.value = themeName;
+  updateEditorPreview();
+};
+
+// --- Zoom Controls ---
+window.changeZoom = function(delta) {
+  currentZoom = Math.max(0.5, Math.min(1.8, Math.round((currentZoom + delta) * 10) / 10));
+  const label = document.getElementById('preview-zoom-label');
+  if (label) label.textContent = Math.round(currentZoom * 100) + '%';
+  applyZoomToFrame('editor-preview-frame', currentZoom);
+};
+
+window.changeModalZoom = function(delta) {
+  currentModalZoom = Math.max(0.5, Math.min(1.8, Math.round((currentModalZoom + delta) * 10) / 10));
+  const label = document.getElementById('modal-zoom-label');
+  if (label) label.textContent = Math.round(currentModalZoom * 100) + '%';
+  applyZoomToFrame('modal-preview-frame', currentModalZoom);
+};
+
+function applyZoomToFrame(frameId, zoomLevel) {
+  const frame = document.getElementById(frameId);
+  if (!frame || !frame.contentDocument) return;
+  try {
+    const body = frame.contentDocument.body;
+    if (body) {
+      body.style.zoom = zoomLevel;
+    }
+  } catch (e) {
+    console.warn('No se pudo aplicar zoom', e);
+  }
+}
 
 // --- File Trigger ---
 window.triggerFileSelect = function() {
@@ -138,7 +171,7 @@ function formatBytes(bytes, decimals = 1) {
   const dm = decimals < 0 ? 0 : decimals;
   const sizes = ['B', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }
 
 function escapeHtml(str) {
@@ -159,16 +192,16 @@ function renderFileList() {
   }
 
   container.classList.remove('hidden');
-  badge.textContent = `${fileQueue.length} archivo${fileQueue.length > 1 ? 's' : ''}`;
+  badge.textContent = fileQueue.length + (fileQueue.length > 1 ? ' archivos' : ' archivo');
 
   list.innerHTML = '';
   fileQueue.forEach((item) => {
     const row = document.createElement('div');
-    row.className = 'flex items-center justify-between p-3.5 bg-slate-800 border border-slate-700 rounded-xl hover:border-slate-600 transition';
+    row.className = 'flex items-center justify-between p-3.5 bg-slate-900 border border-slate-800 rounded-xl hover:border-slate-700 transition';
 
     let statusBadge = '';
     if (item.status === 'ready') {
-      statusBadge = '<span class="text-xs px-2.5 py-0.5 rounded-full bg-slate-700 text-slate-300">Listo</span>';
+      statusBadge = '<span class="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300">Listo</span>';
     } else if (item.status === 'converting') {
       statusBadge = '<span class="text-xs px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-400"><i class="fa-solid fa-spinner fa-spin mr-1"></i>Convirtiendo...</span>';
     } else if (item.status === 'done') {
@@ -186,20 +219,20 @@ function renderFileList() {
           <p class="text-sm font-medium text-white truncate">${escapeHtml(item.name)}</p>
           <div class="flex items-center space-x-2 text-xs text-slate-400">
             <span>${formatBytes(item.size)}</span>
-            <span>•</span>
+            <span>&bull;</span>
             ${statusBadge}
           </div>
         </div>
       </div>
       <div class="flex items-center space-x-2 ml-4 flex-shrink-0">
-        <button onclick="previewFile('${item.id}')" title="Vista Previa" class="p-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 hover:text-white transition">
+        <button onclick="previewFile('${item.id}')" title="Vista Previa" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition">
           <i class="fa-regular fa-eye"></i>
         </button>
         <button onclick="convertSingleFile('${item.id}')" title="Convertir a PDF" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center space-x-1.5 transition">
           <i class="fa-solid fa-file-arrow-down"></i>
           <span>PDF</span>
         </button>
-        <button onclick="removeFile('${item.id}')" title="Eliminar" class="p-2 rounded-lg bg-slate-700 hover:bg-red-500/20 text-slate-400 hover:text-red-400 transition">
+        <button onclick="removeFile('${item.id}')" title="Eliminar" class="p-2 rounded-lg bg-slate-800 hover:bg-red-500/20 text-slate-400 hover:text-red-400 transition">
           <i class="fa-regular fa-trash-can"></i>
         </button>
       </div>
@@ -255,7 +288,7 @@ window.previewFile = async function(id) {
       frame.onload = () => applyZoomToFrame('modal-preview-frame', currentModalZoom);
     }
   } catch (err) {
-    if (frame) frame.srcdoc = `<p style="color:red;padding:20px;">Error en vista previa: ${err.message}</p>`;
+    if (frame) frame.srcdoc = '<p style="color:red;padding:20px;">Error en vista previa: ' + err.message + '</p>';
   }
 };
 
@@ -379,7 +412,7 @@ window.handleBatchConvert = async function() {
     fileQueue.forEach(f => f.status = 'done');
   } catch (err) {
     console.error(err);
-    alert('Error durante la conversión en lote: ' + err.message);
+    alert('Error durante la conversi?n en lote: ' + err.message);
     fileQueue.forEach(f => f.status = 'error');
   } finally {
     if (btn) {
@@ -470,7 +503,7 @@ function updateWordCount() {
   const text = textarea.value.trim();
   const words = text ? text.split(/\s+/).length : 0;
   const chars = text.length;
-  countEl.textContent = `${words} palabras | ${chars} caracteres`;
+  countEl.textContent = words + ' palabras | ' + chars + ' caracteres';
 }
 
 async function updateEditorPreview() {
@@ -481,7 +514,7 @@ async function updateEditorPreview() {
 
   const markdown = textarea.value.trim();
   if (!markdown) {
-    frame.srcdoc = '<p style="font-family:sans-serif;color:#94a3b8;padding:24px;text-align:center;">Escribe Markdown a la izquierda para ver la vista previa en vivo aquí.</p>';
+    frame.srcdoc = '<p style="font-family:sans-serif;color:#94a3b8;padding:24px;text-align:center;">Escribe Markdown a la izquierda para ver la vista previa en vivo aqu?.</p>';
     return;
   }
 
@@ -507,7 +540,7 @@ async function checkServerHealth() {
     const data = await res.json();
     const badge = document.getElementById('server-status-text');
     if (badge && data.status === 'ok') {
-      badge.textContent = data.browserAvailable ? 'Motor Listo' : 'Navegador no detectado';
+      badge.textContent = 'Online';
     }
   } catch (err) {
     console.warn('Servidor offline');
