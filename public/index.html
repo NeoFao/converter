@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Converter - Suite de Conversi&oacute;n</title>
+  <title>Converter - Suite de Conversión</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -12,18 +12,22 @@
     }
   </script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- Client-side PDF and ZIP engines -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script>
+    if (window.pdfjsLib) {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+  </script>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-full flex flex-col font-sans">
-
-  <!-- Top Navigation Bar -->
   <header class="border-b border-slate-800 bg-slate-900/95 backdrop-blur sticky top-0 z-40">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      
-      <!-- Brand Logo -->
       <div class="flex items-center space-x-3 cursor-pointer" onclick="goToDashboard()">
         <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/25">
           <i class="fa-solid fa-arrows-rotate text-white text-lg"></i>
@@ -36,267 +40,207 @@
           <p class="text-xs text-slate-400">Plataforma de Conversi&oacute;n Universal</p>
         </div>
       </div>
-
-      <!-- Navigation & Mode Indicator -->
       <div class="flex items-center space-x-3">
-        
-        <!-- Back to Dashboard button -->
-        <button id="btn-nav-dashboard" onclick="goToDashboard()" class="hidden px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center space-x-2 border border-slate-700 transition">
+        <button id="btn-nav-dashboard" onclick="goToDashboard()" class="hidden px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center space-x-2 border border-slate-700 transition shadow-sm">
           <i class="fa-solid fa-grip text-indigo-400"></i>
           <span>Dashboard</span>
         </button>
-
-        <!-- Markdown Tool Sub-Tabs -->
         <div id="md-tool-tabs" class="hidden flex items-center bg-slate-800 p-1 rounded-xl border border-slate-700">
           <button id="tab-btn-files" onclick="switchToolTab('files')" class="tab-btn active px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-2 transition-all">
-            <i class="fa-regular fa-folder-open"></i>
-            <span>Subir Archivos</span>
+            <i class="fa-regular fa-folder-open"></i><span>Subir Archivos</span>
           </button>
           <button id="tab-btn-editor" onclick="switchToolTab('editor')" class="tab-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-2 transition-all text-slate-400 hover:text-white">
-            <i class="fa-solid fa-pen-nib"></i>
-            <span>Pegar Markdown</span>
+            <i class="fa-solid fa-pen-nib"></i><span>Pegar Markdown</span>
           </button>
           <button id="tab-btn-ai" onclick="switchToolTab('ai')" class="tab-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-2 transition-all text-slate-400 hover:text-white">
-            <i class="fa-solid fa-robot"></i>
-            <span>Gu&iacute;a IA / API</span>
+            <i class="fa-solid fa-robot"></i><span>Gu&iacute;a IA / API</span>
           </button>
         </div>
-
-        <!-- Cloud Status Badge -->
         <div class="hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium">
           <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
           <span id="server-status-text">Online</span>
         </div>
-
       </div>
     </div>
   </header>
-
-  <!-- Main Content Container -->
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-
-    <!-- VIEW 1: DASHBOARD -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">    <!-- VIEW 0: MAIN DASHBOARD -->
     <div id="view-dashboard" class="space-y-8">
-      
-      <!-- Welcome Hero Banner -->
       <div class="relative overflow-hidden bg-gradient-to-r from-slate-900 via-indigo-950/60 to-slate-900 border border-slate-800 rounded-3xl p-8 sm:p-10 shadow-2xl">
         <div class="relative z-10 max-w-2xl space-y-3">
           <span class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 text-xs font-semibold">
             <i class="fa-solid fa-sparkles text-indigo-400"></i>
-            <span>Suite de Herramientas</span>
+            <span>6 M&oacute;dulos Activos</span>
           </span>
           <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
             Convierte tus archivos a cualquier formato al instante
           </h1>
           <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
-            Herramientas de conversi&oacute;n de alto rendimiento, optimizadas para usuarios y compatibles con Inteligencias Artificiales v&iacute;a API REST.
+            Herramientas de conversi&oacute;n de alto rendimiento y m&aacute;xima privacidad. Ejecutadas directamente en tu navegador y compatibles con IAs v&iacute;a API.
           </p>
         </div>
+        <div class="absolute -right-10 -bottom-10 w-72 h-72 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none"></div>
       </div>
 
-      <!-- Conversion Tools Grid -->
       <div>
         <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-5 flex items-center space-x-2">
-          <i class="fa-solid fa-grid-2 text-indigo-400"></i>
-          <span>M&oacute;dulos de Conversi&oacute;n</span>
+          <i class="fa-solid fa-grid-2 text-indigo-400"></i><span>M&oacute;dulos de Conversi&oacute;n</span>
         </h2>
-
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
-          <!-- CARD 1: MARKDOWN A PDF (ACTIVE) -->
-          <div onclick="openTool('markdown')" class="group relative bg-slate-900/90 hover:bg-slate-800 border-2 border-indigo-500/60 hover:border-indigo-400 rounded-2xl p-6 transition-all duration-200 cursor-pointer shadow-xl hover:shadow-indigo-500/10 transform hover:-translate-y-1">
-            <div class="flex items-start justify-between mb-4">
-              <div class="w-12 h-12 rounded-xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
-                <i class="fa-brands fa-markdown"></i>
+          <!-- CARD 1: MARKDOWN A PDF -->
+          <div onclick="openTool('markdown')" class="group bg-slate-900/90 hover:bg-slate-850 border-2 border-indigo-500/60 hover:border-indigo-400 rounded-2xl p-6 transition-all duration-200 cursor-pointer shadow-xl hover:shadow-indigo-500/10 transform hover:-translate-y-1 flex flex-col justify-between">
+            <div>
+              <div class="flex items-start justify-between mb-4">
+                <div class="w-12 h-12 rounded-xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform"><i class="fa-brands fa-markdown"></i></div>
+                <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold flex items-center space-x-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span><span>Activo</span></span>
               </div>
-              <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold flex items-center space-x-1">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                <span>Activo</span>
-              </span>
+              <h3 class="text-lg font-bold text-white group-hover:text-indigo-300 transition">Markdown (.md) a PDF</h3>
+              <p class="text-xs text-slate-400 mt-2 leading-relaxed">Convierte archivos .md a PDF profesional con soporte de f&oacute;rmulas LaTeX, tablas, resaltado de c&oacute;digo y 5 temas de dise&ntilde;o.</p>
             </div>
-            <h3 class="text-lg font-bold text-white group-hover:text-indigo-300 transition">Markdown (.md) a PDF</h3>
-            <p class="text-xs text-slate-400 mt-2 leading-relaxed">
-              Convierte archivos .md a PDF profesional con soporte de f&oacute;rmulas LaTeX, tablas, resaltado de c&oacute;digo y 5 temas de dise&ntilde;o.
-            </p>
             <div class="mt-5 pt-4 border-t border-slate-800 flex items-center justify-between text-xs font-semibold text-indigo-400 group-hover:text-indigo-300">
-              <span>Abrir conversor</span>
-              <i class="fa-solid fa-arrow-right transform group-hover:translate-x-1 transition-transform"></i>
+              <span>Abrir conversor</span><i class="fa-solid fa-arrow-right transform group-hover:translate-x-1 transition-transform"></i>
             </div>
           </div>
 
-          <!-- CARD 2: WORD A PDF (COMING SOON) -->
-          <div class="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-6 opacity-75 relative">
-            <div class="flex items-start justify-between mb-4">
-              <div class="w-12 h-12 rounded-xl bg-blue-600/10 text-blue-400 flex items-center justify-center text-2xl">
-                <i class="fa-regular fa-file-word"></i>
+          <!-- CARD 2: WORD A PDF -->
+          <div onclick="openTool('word')" class="group bg-slate-900/90 hover:bg-slate-850 border-2 border-blue-500/40 hover:border-blue-400 rounded-2xl p-6 transition-all duration-200 cursor-pointer shadow-xl hover:shadow-blue-500/10 transform hover:-translate-y-1 flex flex-col justify-between">
+            <div>
+              <div class="flex items-start justify-between mb-4">
+                <div class="w-12 h-12 rounded-xl bg-blue-600/20 text-blue-400 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform"><i class="fa-regular fa-file-word"></i></div>
+                <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold flex items-center space-x-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span><span>Activo</span></span>
               </div>
-              <span class="px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-400 text-xs font-medium border border-slate-700">Pr&oacute;ximamente</span>
+              <h3 class="text-lg font-bold text-white group-hover:text-blue-300 transition">Word (.docx) a PDF</h3>
+              <p class="text-xs text-slate-400 mt-2 leading-relaxed">Convierte documentos de Microsoft Word (.docx) a formato PDF preservando encabezados, tablas, estilos e im&aacute;genes.</p>
             </div>
-            <h3 class="text-lg font-bold text-slate-300">Word (.docx) a PDF</h3>
-            <p class="text-xs text-slate-500 mt-2 leading-relaxed">Convierte documentos de Word (.docx, .doc) a formato PDF preservando fuentes, formatos e im&aacute;genes.</p>
-            <div class="mt-5 pt-4 border-t border-slate-800/60 flex items-center text-xs text-slate-500"><span>En desarrollo</span></div>
+            <div class="mt-5 pt-4 border-t border-slate-800 flex items-center justify-between text-xs font-semibold text-blue-400 group-hover:text-blue-300">
+              <span>Abrir conversor</span><i class="fa-solid fa-arrow-right transform group-hover:translate-x-1 transition-transform"></i>
+            </div>
           </div>
 
-          <!-- CARD 3: IMAGENES A PDF (COMING SOON) -->
-          <div class="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-6 opacity-75 relative">
-            <div class="flex items-start justify-between mb-4">
-              <div class="w-12 h-12 rounded-xl bg-amber-600/10 text-amber-400 flex items-center justify-center text-2xl">
-                <i class="fa-regular fa-images"></i>
+          <!-- CARD 3: IMAGENES A PDF -->
+          <div onclick="openTool('images')" class="group bg-slate-900/90 hover:bg-slate-850 border-2 border-amber-500/40 hover:border-amber-400 rounded-2xl p-6 transition-all duration-200 cursor-pointer shadow-xl hover:shadow-amber-500/10 transform hover:-translate-y-1 flex flex-col justify-between">
+            <div>
+              <div class="flex items-start justify-between mb-4">
+                <div class="w-12 h-12 rounded-xl bg-amber-600/20 text-amber-400 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform"><i class="fa-regular fa-images"></i></div>
+                <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold flex items-center space-x-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span><span>Activo</span></span>
               </div>
-              <span class="px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-400 text-xs font-medium border border-slate-700">Pr&oacute;ximamente</span>
+              <h3 class="text-lg font-bold text-white group-hover:text-amber-300 transition">Im&aacute;genes a PDF</h3>
+              <p class="text-xs text-slate-400 mt-2 leading-relaxed">Combina una o m&uacute;ltiples fotos (PNG, JPG, WebP) en un &uacute;nico archivo PDF de alta resoluci&oacute;n con ajuste autom&aacute;tico.</p>
             </div>
-            <h3 class="text-lg font-bold text-slate-300">Im&aacute;genes a PDF</h3>
-            <p class="text-xs text-slate-500 mt-2 leading-relaxed">Combina m&uacute;ltiples im&aacute;genes (PNG, JPG, WebP) en un &uacute;nico archivo PDF de alta resoluci&oacute;n.</p>
-            <div class="mt-5 pt-4 border-t border-slate-800/60 flex items-center text-xs text-slate-500"><span>En desarrollo</span></div>
+            <div class="mt-5 pt-4 border-t border-slate-800 flex items-center justify-between text-xs font-semibold text-amber-400 group-hover:text-amber-300">
+              <span>Abrir conversor</span><i class="fa-solid fa-arrow-right transform group-hover:translate-x-1 transition-transform"></i>
+            </div>
           </div>
 
-          <!-- CARD 4: PDF A MARKDOWN (COMING SOON) -->
-          <div class="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-6 opacity-75 relative">
-            <div class="flex items-start justify-between mb-4">
-              <div class="w-12 h-12 rounded-xl bg-purple-600/10 text-purple-400 flex items-center justify-center text-2xl">
-                <i class="fa-solid fa-file-invoice"></i>
+          <!-- CARD 4: PDF A MARKDOWN -->
+          <div onclick="openTool('pdf2md')" class="group bg-slate-900/90 hover:bg-slate-850 border-2 border-purple-500/40 hover:border-purple-400 rounded-2xl p-6 transition-all duration-200 cursor-pointer shadow-xl hover:shadow-purple-500/10 transform hover:-translate-y-1 flex flex-col justify-between">
+            <div>
+              <div class="flex items-start justify-between mb-4">
+                <div class="w-12 h-12 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform"><i class="fa-solid fa-file-invoice"></i></div>
+                <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold flex items-center space-x-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span><span>Activo</span></span>
               </div>
-              <span class="px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-400 text-xs font-medium border border-slate-700">Pr&oacute;ximamente</span>
+              <h3 class="text-lg font-bold text-white group-hover:text-purple-300 transition">PDF a Markdown</h3>
+              <p class="text-xs text-slate-400 mt-2 leading-relaxed">Extrae el texto y estructura de cualquier PDF y convi&eacute;rtelo en Markdown limpio con editor y descarga inmediata.</p>
             </div>
-            <h3 class="text-lg font-bold text-slate-300">PDF a Markdown</h3>
-            <p class="text-xs text-slate-500 mt-2 leading-relaxed">Extrae texto, tablas y encabezados de un archivo PDF y convi&eacute;rtelos a formato Markdown limpio.</p>
-            <div class="mt-5 pt-4 border-t border-slate-800/60 flex items-center text-xs text-slate-500"><span>En desarrollo</span></div>
+            <div class="mt-5 pt-4 border-t border-slate-800 flex items-center justify-between text-xs font-semibold text-purple-400 group-hover:text-purple-300">
+              <span>Abrir conversor</span><i class="fa-solid fa-arrow-right transform group-hover:translate-x-1 transition-transform"></i>
+            </div>
           </div>
 
-          <!-- CARD 5: HTML A PDF (COMING SOON) -->
-          <div class="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-6 opacity-75 relative">
-            <div class="flex items-start justify-between mb-4">
-              <div class="w-12 h-12 rounded-xl bg-rose-600/10 text-rose-400 flex items-center justify-center text-2xl">
-                <i class="fa-brands fa-html5"></i>
+          <!-- CARD 5: HTML A PDF -->
+          <div onclick="openTool('html')" class="group bg-slate-900/90 hover:bg-slate-850 border-2 border-rose-500/40 hover:border-rose-400 rounded-2xl p-6 transition-all duration-200 cursor-pointer shadow-xl hover:shadow-rose-500/10 transform hover:-translate-y-1 flex flex-col justify-between">
+            <div>
+              <div class="flex items-start justify-between mb-4">
+                <div class="w-12 h-12 rounded-xl bg-rose-600/20 text-rose-400 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform"><i class="fa-brands fa-html5"></i></div>
+                <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold flex items-center space-x-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span><span>Activo</span></span>
               </div>
-              <span class="px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-400 text-xs font-medium border border-slate-700">Pr&oacute;ximamente</span>
+              <h3 class="text-lg font-bold text-white group-hover:text-rose-300 transition">HTML a PDF</h3>
+              <p class="text-xs text-slate-400 mt-2 leading-relaxed">Renderiza c&oacute;digo o archivos HTML completos con CSS a documentos PDF con vista previa interactiva en tiempo real.</p>
             </div>
-            <h3 class="text-lg font-bold text-slate-300">HTML a PDF</h3>
-            <p class="text-xs text-slate-500 mt-2 leading-relaxed">Renderiza p&aacute;ginas web y c&oacute;digo HTML completo con CSS a documentos PDF de alta precisi&oacute;n.</p>
-            <div class="mt-5 pt-4 border-t border-slate-800/60 flex items-center text-xs text-slate-500"><span>En desarrollo</span></div>
+            <div class="mt-5 pt-4 border-t border-slate-800 flex items-center justify-between text-xs font-semibold text-rose-400 group-hover:text-rose-300">
+              <span>Abrir conversor</span><i class="fa-solid fa-arrow-right transform group-hover:translate-x-1 transition-transform"></i>
+            </div>
           </div>
 
-          <!-- CARD 6: JSON / CSV A EXCEL (COMING SOON) -->
-          <div class="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-6 opacity-75 relative">
-            <div class="flex items-start justify-between mb-4">
-              <div class="w-12 h-12 rounded-xl bg-teal-600/10 text-teal-400 flex items-center justify-center text-2xl">
-                <i class="fa-regular fa-file-excel"></i>
+          <!-- CARD 6: JSON / CSV A EXCEL -->
+          <div onclick="openTool('excel')" class="group bg-slate-900/90 hover:bg-slate-850 border-2 border-teal-500/40 hover:border-teal-400 rounded-2xl p-6 transition-all duration-200 cursor-pointer shadow-xl hover:shadow-teal-500/10 transform hover:-translate-y-1 flex flex-col justify-between">
+            <div>
+              <div class="flex items-start justify-between mb-4">
+                <div class="w-12 h-12 rounded-xl bg-teal-600/20 text-teal-400 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform"><i class="fa-regular fa-file-excel"></i></div>
+                <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold flex items-center space-x-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span><span>Activo</span></span>
               </div>
-              <span class="px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-400 text-xs font-medium border border-slate-700">Pr&oacute;ximamente</span>
+              <h3 class="text-lg font-bold text-white group-hover:text-teal-300 transition">JSON / CSV a Excel</h3>
+              <p class="text-xs text-slate-400 mt-2 leading-relaxed">Convierte datos JSON o tablas CSV en archivos de hoja de c&aacute;lculo Excel (.xlsx) con vista previa de tabla interactiva.</p>
             </div>
-            <h3 class="text-lg font-bold text-slate-300">JSON / CSV a Excel</h3>
-            <p class="text-xs text-slate-500 mt-2 leading-relaxed">Convierte conjuntos de datos en hojas de c&aacute;lculo .xlsx organizadas autom&aacute;ticamente.</p>
-            <div class="mt-5 pt-4 border-t border-slate-800/60 flex items-center text-xs text-slate-500"><span>En desarrollo</span></div>
+            <div class="mt-5 pt-4 border-t border-slate-800 flex items-center justify-between text-xs font-semibold text-teal-400 group-hover:text-teal-300">
+              <span>Abrir conversor</span><i class="fa-solid fa-arrow-right transform group-hover:translate-x-1 transition-transform"></i>
+            </div>
           </div>
-
         </div>
       </div>
-
-    </div>
-
-    <!-- VIEW 2: MARKDOWN TOOL -->
+    </div>    <!-- VIEW 1: MARKDOWN A PDF -->
     <div id="view-tool-markdown" class="space-y-6 hidden">
-      
-      <!-- Top back bar -->
       <div class="flex items-center justify-between bg-slate-900/80 border border-slate-800 p-4 rounded-2xl">
         <div class="flex items-center space-x-3">
           <button onclick="goToDashboard()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center space-x-1.5 transition border border-slate-700">
-            <i class="fa-solid fa-arrow-left"></i>
-            <span>Dashboard</span>
+            <i class="fa-solid fa-arrow-left"></i><span>Dashboard</span>
           </button>
           <div class="h-4 w-px bg-slate-700"></div>
-          <span class="text-sm font-bold text-white flex items-center space-x-2">
-            <i class="fa-brands fa-markdown text-indigo-400 text-base"></i>
-            <span>Conversor de Markdown (.md) a PDF</span>
-          </span>
+          <span class="text-sm font-bold text-white flex items-center space-x-2"><i class="fa-brands fa-markdown text-indigo-400 text-base"></i><span>Conversor de Markdown (.md) a PDF</span></span>
         </div>
       </div>
-
-      <!-- SUBTAB 1: FILES UPLOAD -->
       <div id="tool-subtab-files" class="space-y-6">
-
         <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl">
-          <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4 flex items-center space-x-2">
-            <i class="fa-solid fa-sliders text-indigo-400"></i>
-            <span>Opciones de Salida y Dise&ntilde;o</span>
-          </h2>
-
+          <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4 flex items-center space-x-2"><i class="fa-solid fa-sliders text-indigo-400"></i><span>Opciones de Salida</span></h2>
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
             <div>
               <label class="block text-xs font-medium text-slate-300 mb-2">Tema Visual</label>
-              <div class="relative">
-                <select id="config-theme" onchange="syncTheme(this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none pr-10 cursor-pointer">
-                  <option value="github" selected>GitHub Modern (Est&aacute;ndar)</option>
-                  <option value="academic">Academic Paper (Serif & Formato)</option>
-                  <option value="executive">Executive Report (Corporativo)</option>
-                  <option value="minimal">Minimalist Clean (Tipograf&iacute;a Suiza)</option>
-                  <option value="dark">Modern Dark (Tema Oscuro)</option>
-                </select>
-                <i class="fa-solid fa-chevron-down absolute right-3.5 top-3.5 text-slate-500 pointer-events-none text-xs"></i>
-              </div>
+              <select id="config-theme" onchange="syncTheme(this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+                <option value="github" selected>GitHub Modern (Est&aacute;ndar)</option>
+                <option value="academic">Academic Paper (Serif & Formato)</option>
+                <option value="executive">Executive Report (Corporativo)</option>
+                <option value="minimal">Minimalist Clean (Tipograf&iacute;a Suiza)</option>
+                <option value="dark">Modern Dark (Tema Oscuro)</option>
+              </select>
             </div>
-
             <div>
               <label class="block text-xs font-medium text-slate-300 mb-2">Tama&ntilde;o de Hoja</label>
-              <div class="relative">
-                <select id="config-format" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none pr-10 cursor-pointer">
-                  <option value="a4" selected>A4 (210 x 297 mm)</option>
-                  <option value="letter">Carta / US Letter (8.5 x 11 in)</option>
-                  <option value="legal">Legal / Oficio</option>
-                  <option value="a3">A3 (Doble A4)</option>
-                </select>
-                <i class="fa-solid fa-chevron-down absolute right-3.5 top-3.5 text-slate-500 pointer-events-none text-xs"></i>
-              </div>
+              <select id="config-format" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+                <option value="a4" selected>A4 (210 x 297 mm)</option>
+                <option value="letter">Carta / US Letter (8.5 x 11 in)</option>
+                <option value="legal">Legal / Oficio</option>
+                <option value="a3">A3 (Doble A4)</option>
+              </select>
             </div>
-
             <div>
               <label class="block text-xs font-medium text-slate-300 mb-2">M&aacute;rgenes</label>
-              <div class="relative">
-                <select id="config-margin" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none pr-10 cursor-pointer">
-                  <option value="normal" selected>Normal (15 mm)</option>
-                  <option value="compact">Compacto (10 mm)</option>
-                  <option value="wide">Amplio (22 mm)</option>
-                  <option value="none">Sin M&aacute;rgenes (0 mm)</option>
-                </select>
-                <i class="fa-solid fa-chevron-down absolute right-3.5 top-3.5 text-slate-500 pointer-events-none text-xs"></i>
-              </div>
+              <select id="config-margin" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+                <option value="normal" selected>Normal (15 mm)</option>
+                <option value="compact">Compacto (10 mm)</option>
+                <option value="wide">Amplio (22 mm)</option>
+                <option value="none">Sin M&aacute;rgenes (0 mm)</option>
+              </select>
             </div>
-
             <div class="flex flex-col justify-end space-y-2.5">
               <label class="flex items-center space-x-2.5 cursor-pointer text-xs font-medium text-slate-300 select-none">
                 <input type="checkbox" id="config-landscape" class="w-4 h-4 rounded bg-slate-950 border-slate-700 text-indigo-600 focus:ring-indigo-500">
                 <span>Orientaci&oacute;n Horizontal (Landscape)</span>
               </label>
-              <label class="flex items-center space-x-2.5 cursor-pointer text-xs font-medium text-slate-300 select-none">
-                <input type="checkbox" id="config-merge" class="w-4 h-4 rounded bg-slate-950 border-slate-700 text-indigo-600 focus:ring-indigo-500">
-                <span class="text-indigo-300 font-semibold">Descargar lote en ZIP</span>
-              </label>
             </div>
           </div>
         </div>
-
         <input type="file" id="file-input" multiple accept=".md,.markdown" style="display: none;">
-
-        <div id="dropzone" onclick="triggerFileSelect()" class="relative border-2 border-dashed border-slate-700 hover:border-indigo-500 bg-slate-900/60 hover:bg-slate-900 rounded-2xl p-10 text-center transition-all duration-200 cursor-pointer shadow-lg">
+        <div id="dropzone" onclick="triggerFileSelect()" class="border-2 border-dashed border-slate-700 hover:border-indigo-500 bg-slate-900/60 hover:bg-slate-900 rounded-2xl p-10 text-center transition cursor-pointer shadow-lg">
           <div class="flex flex-col items-center justify-center space-y-4">
-            <div class="w-16 h-16 rounded-2xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center text-3xl">
-              <i class="fa-solid fa-cloud-arrow-up"></i>
-            </div>
+            <div class="w-16 h-16 rounded-2xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center text-3xl"><i class="fa-solid fa-cloud-arrow-up"></i></div>
             <div>
               <p class="text-base font-semibold text-white">Arrastra uno o varios archivos Markdown (.md) aqu&iacute;</p>
               <p class="text-xs text-slate-400 mt-1">o haz clic en el bot&oacute;n para seleccionarlos</p>
             </div>
             <button type="button" onclick="event.stopPropagation(); triggerFileSelect();" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl shadow-md transition flex items-center space-x-2">
-              <i class="fa-regular fa-folder-open"></i>
-              <span>Explorar Archivos .md</span>
+              <i class="fa-regular fa-folder-open"></i><span>Explorar Archivos .md</span>
             </button>
-            <div class="flex items-center space-x-2 text-xs text-slate-400 bg-slate-950 px-3 py-1.5 rounded-full border border-slate-800">
-              <i class="fa-solid fa-check text-emerald-400"></i>
-              <span>Soporta tablas, c&oacute;digo resaltado, LaTeX y encabezados</span>
-            </div>
           </div>
         </div>
-
         <div id="file-list-container" class="space-y-4 hidden">
           <div class="flex items-center justify-between">
             <div class="flex items-center space-x-3">
@@ -304,73 +248,42 @@
               <span id="file-count-badge" class="px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-400 text-xs font-semibold">0 archivos</span>
             </div>
             <div class="flex items-center space-x-2">
-              <button onclick="loadSampleDoc()" class="text-xs px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
-                <i class="fa-regular fa-lightbulb text-amber-400 mr-1.5"></i>Cargar archivo de prueba
-              </button>
-              <button onclick="clearAllFiles()" class="text-xs px-3 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 transition">
-                <i class="fa-regular fa-trash-can mr-1.5"></i>Limpiar Lista
-              </button>
+              <button onclick="loadSampleDoc()" class="text-xs px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition"><i class="fa-regular fa-lightbulb text-amber-400 mr-1.5"></i>Cargar ejemplo</button>
+              <button onclick="clearAllFiles()" class="text-xs px-3 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 transition"><i class="fa-regular fa-trash-can mr-1.5"></i>Limpiar</button>
             </div>
           </div>
-
           <div id="file-list" class="space-y-2.5"></div>
-
           <div class="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-xl">
-            <div class="flex items-center space-x-3 text-xs text-slate-400">
-              <i class="fa-solid fa-shield-halved text-indigo-400 text-base"></i>
-              <span>Conversi&oacute;n instant&aacute;nea y segura en tu navegador. Privacidad total.</span>
-            </div>
-
-            <button id="btn-convert-all" onclick="handleBatchConvert()" class="w-full sm:w-auto px-7 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-600/30 flex items-center justify-center space-x-2.5 transition transform active:scale-95">
-              <i class="fa-solid fa-wand-magic-sparkles"></i>
-              <span id="btn-convert-all-text">Convertir Todo a PDF</span>
-            </button>
+            <span class="text-xs text-slate-400">Conversi&oacute;n r&aacute;pida y directa en el navegador.</span>
+            <button id="btn-convert-all" onclick="handleBatchConvert()" class="w-full sm:w-auto px-7 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-600/30 flex items-center justify-center space-x-2.5 transition"><i class="fa-solid fa-wand-magic-sparkles"></i><span id="btn-convert-all-text">Convertir Todo a PDF</span></button>
           </div>
         </div>
-
       </div>
 
-      <!-- SUBTAB 2: EDITOR -->
       <div id="tool-subtab-editor" class="hidden space-y-6">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[760px]">
           <div class="flex flex-col bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
             <div class="flex items-center justify-between mb-3">
-              <div class="flex items-center space-x-2">
-                <i class="fa-brands fa-markdown text-indigo-400 text-lg"></i>
-                <span class="text-sm font-semibold text-white">Editor Markdown</span>
-              </div>
+              <span class="text-sm font-semibold text-white flex items-center space-x-2"><i class="fa-brands fa-markdown text-indigo-400"></i><span>Editor Markdown</span></span>
               <div class="flex items-center space-x-2">
                 <button onclick="loadEditorSample()" class="text-xs px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg transition">Cargar Ejemplo</button>
                 <button onclick="clearEditor()" class="text-xs px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg transition">Limpiar</button>
               </div>
             </div>
-            <textarea id="editor-textarea" placeholder="Escribe o pega tu texto Markdown aqu&iacute;... Puedes usar f&oacute;rmulas LaTeX como $$E=mc^2$$, c&oacute;digo en cualquier lenguaje, tablas, listas y t&iacute;tulos." class="w-full flex-1 bg-slate-950 border border-slate-800 rounded-xl p-4 text-slate-200 font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500 leading-relaxed"></textarea>
+            <textarea id="editor-textarea" placeholder="Escribe o pega Markdown aqu&iacute;..." class="w-full flex-1 bg-slate-950 border border-slate-800 rounded-xl p-4 text-slate-200 font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500 leading-relaxed"></textarea>
             <div class="mt-4 flex items-center justify-between pt-3 border-t border-slate-800">
-              <span id="editor-word-count" class="text-xs text-slate-400">0 palabras | 0 caracteres</span>
-              <button id="btn-editor-convert" onclick="convertFromEditor()" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl flex items-center space-x-2 transition shadow-lg shadow-indigo-600/20">
-                <i class="fa-solid fa-file-pdf"></i>
-                <span id="btn-editor-convert-text">Generar y Descargar PDF</span>
-              </button>
+              <span id="editor-word-count" class="text-xs text-slate-400">0 palabras</span>
+              <button id="btn-editor-convert" onclick="convertFromEditor()" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl flex items-center space-x-2 transition"><i class="fa-solid fa-file-pdf"></i><span id="btn-editor-convert-text">Generar y Descargar PDF</span></button>
             </div>
           </div>
           <div class="flex flex-col bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl overflow-hidden">
             <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-800">
+              <span class="text-sm font-semibold text-white flex items-center space-x-2"><i class="fa-regular fa-file-lines text-indigo-400"></i><span>Vista Previa (Hoja PDF)</span></span>
               <div class="flex items-center space-x-2">
-                <i class="fa-regular fa-file-lines text-indigo-400 text-base"></i>
-                <span class="text-sm font-semibold text-white">Vista Previa (Hoja PDF)</span>
-              </div>
-              <div class="flex items-center space-x-2">
-                <select id="preview-theme-select" onchange="syncTheme(this.value)" class="bg-slate-950 border border-slate-700 text-xs text-slate-200 rounded-lg px-2.5 py-1 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer">
-                  <option value="github">GitHub Modern</option>
-                  <option value="academic">Academic Paper</option>
-                  <option value="executive">Executive Report</option>
-                  <option value="minimal">Minimalist Clean</option>
-                  <option value="dark">Modern Dark</option>
-                </select>
                 <div class="flex items-center bg-slate-950 border border-slate-700 rounded-lg overflow-hidden">
-                  <button onclick="changeZoom(-0.1)" title="Alejar" class="px-2 py-1 text-xs text-slate-400 hover:text-white hover:bg-slate-800 transition"><i class="fa-solid fa-minus"></i></button>
+                  <button onclick="changeZoom(-0.1)" class="px-2 py-1 text-xs text-slate-400 hover:text-white hover:bg-slate-800"><i class="fa-solid fa-minus"></i></button>
                   <span id="preview-zoom-label" class="text-xs px-2 font-mono text-indigo-300 select-none">100%</span>
-                  <button onclick="changeZoom(0.1)" title="Acercar" class="px-2 py-1 text-xs text-slate-400 hover:text-white hover:bg-slate-800 transition"><i class="fa-solid fa-plus"></i></button>
+                  <button onclick="changeZoom(0.1)" class="px-2 py-1 text-xs text-slate-400 hover:text-white hover:bg-slate-800"><i class="fa-solid fa-plus"></i></button>
                 </div>
               </div>
             </div>
@@ -381,26 +294,198 @@
         </div>
       </div>
 
-      <!-- SUBTAB 3: AI GUIDE -->
       <div id="tool-subtab-ai" class="hidden space-y-6">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+          <h2 class="text-base font-bold text-white flex items-center space-x-2"><i class="fa-solid fa-robot text-indigo-400"></i><span>Gu&iacute;a para IA y API REST</span></h2>
+          <pre class="bg-slate-950 p-4 rounded-xl text-xs font-mono text-emerald-400 overflow-x-auto">curl -X POST https://converter-blue-one.vercel.app/api/convert \\
+  -H "Content-Type: application/json" \\
+  -d '{"markdown": "# Mi Reporte\\nContenido", "theme": "executive"}' \\
+  --output doc.pdf</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW 2: WORD (.docx) A PDF -->
+    <div id="view-tool-word" class="space-y-6 hidden">
+      <div class="flex items-center justify-between bg-slate-900/80 border border-slate-800 p-4 rounded-2xl">
+        <div class="flex items-center space-x-3">
+          <button onclick="goToDashboard()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center space-x-1.5 transition border border-slate-700">
+            <i class="fa-solid fa-arrow-left"></i><span>Dashboard</span>
+          </button>
+          <div class="h-4 w-px bg-slate-700"></div>
+          <span class="text-sm font-bold text-white flex items-center space-x-2"><i class="fa-regular fa-file-word text-blue-400 text-base"></i><span>Conversor de Word (.docx) a PDF</span></span>
+        </div>
+      </div>
+      <input type="file" id="word-file-input" accept=".docx" style="display:none;">
+      <div onclick="document.getElementById('word-file-input').click()" class="border-2 border-dashed border-slate-700 hover:border-blue-500 bg-slate-900/60 hover:bg-slate-900 rounded-2xl p-10 text-center transition cursor-pointer shadow-lg">
+        <div class="flex flex-col items-center justify-center space-y-4">
+          <div class="w-16 h-16 rounded-2xl bg-blue-500/10 text-blue-400 flex items-center justify-center text-3xl"><i class="fa-regular fa-file-word"></i></div>
           <div>
-            <div class="flex items-center space-x-3 mb-2">
-              <div class="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center">
-                <i class="fa-solid fa-robot"></i>
-              </div>
-              <h2 class="text-lg font-bold text-white">Integraci&oacute;n para Inteligencias Artificiales y Scripts</h2>
-            </div>
-            <p class="text-xs sm:text-sm text-slate-300">Cualquier agente de IA, script de Python, Node.js o comando de terminal puede interactuar directamente con esta app para convertir archivos a m&aacute;xima velocidad.</p>
+            <p class="text-base font-semibold text-white">Arrastra o selecciona tu archivo de Word (.docx)</p>
+            <p class="text-xs text-slate-400 mt-1">Preserva encabezados, tablas, listas y formatos.</p>
           </div>
-          <div class="space-y-3">
-            <h3 class="text-xs font-bold text-indigo-400 uppercase tracking-wider flex items-center space-x-2"><i class="fa-solid fa-terminal"></i><span>1. Modo CLI (L&iacute;nea de Comandos)</span></h3>
-            <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 font-mono text-xs text-slate-300 space-y-2 overflow-x-auto">
-              <div class="text-slate-500"># Convertir un archivo simple</div>
-              <div class="text-emerald-400">node cli.js documento.md -o salida.pdf</div>
-              <div class="text-slate-500 mt-2"># Convertir con tema ejecutivo y formato Carta</div>
-              <div class="text-emerald-400">node cli.js reporte.md --theme executive --format Letter</div>
+          <button type="button" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-xl shadow-md transition flex items-center space-x-2">
+            <i class="fa-regular fa-folder-open"></i><span>Seleccionar archivo .docx</span>
+          </button>
+        </div>
+      </div>
+      <div id="word-result-container" class="space-y-4 hidden">
+        <div class="flex items-center justify-between bg-slate-900 p-4 border border-slate-800 rounded-2xl shadow-xl">
+          <div class="flex items-center space-x-3">
+            <i class="fa-regular fa-file-lines text-blue-400 text-lg"></i>
+            <span id="word-doc-name" class="text-sm font-semibold text-white">documento.docx</span>
+          </div>
+          <button id="btn-word-download-pdf" onclick="downloadWordAsPdf()" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-xl shadow-lg shadow-blue-600/30 flex items-center space-x-2 transition">
+            <i class="fa-solid fa-file-arrow-down"></i><span>Descargar como PDF</span>
+          </button>
+        </div>
+        <div class="bg-white text-slate-900 border border-slate-800 rounded-2xl p-8 shadow-xl max-h-[600px] overflow-y-auto">
+          <div id="word-html-preview" class="max-w-none text-sm leading-relaxed"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW 3: IMAGENES A PDF -->
+    <div id="view-tool-images" class="space-y-6 hidden">
+      <div class="flex items-center justify-between bg-slate-900/80 border border-slate-800 p-4 rounded-2xl">
+        <div class="flex items-center space-x-3">
+          <button onclick="goToDashboard()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center space-x-1.5 transition border border-slate-700">
+            <i class="fa-solid fa-arrow-left"></i><span>Dashboard</span>
+          </button>
+          <div class="h-4 w-px bg-slate-700"></div>
+          <span class="text-sm font-bold text-white flex items-center space-x-2"><i class="fa-regular fa-images text-amber-400 text-base"></i><span>Conversor de Im&aacute;genes a PDF</span></span>
+        </div>
+      </div>
+      <input type="file" id="images-file-input" multiple accept="image/*" style="display:none;">
+      <div onclick="document.getElementById('images-file-input').click()" class="border-2 border-dashed border-slate-700 hover:border-amber-500 bg-slate-900/60 hover:bg-slate-900 rounded-2xl p-10 text-center transition cursor-pointer shadow-lg">
+        <div class="flex flex-col items-center justify-center space-y-4">
+          <div class="w-16 h-16 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-3xl"><i class="fa-regular fa-images"></i></div>
+          <div>
+            <p class="text-base font-semibold text-white">Arrastra o selecciona tus im&aacute;genes (PNG, JPG, WebP)</p>
+            <p class="text-xs text-slate-400 mt-1">Puedes seleccionar m&uacute;ltiples im&aacute;genes para combinarlas en un solo PDF.</p>
+          </div>
+          <button type="button" class="px-5 py-2.5 bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold rounded-xl shadow-md transition flex items-center space-x-2">
+            <i class="fa-regular fa-folder-open"></i><span>Seleccionar Im&aacute;genes</span>
+          </button>
+        </div>
+      </div>
+      <div id="images-list-container" class="space-y-4 hidden">
+        <div class="flex items-center justify-between">
+          <span id="images-count-label" class="text-xs font-semibold text-amber-400 px-3 py-1 bg-amber-500/10 rounded-full border border-amber-500/20">0 im&aacute;genes cargadas</span>
+          <button onclick="clearImagesQueue()" class="text-xs px-3 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 transition">Limpiar</button>
+        </div>
+        <div id="images-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4"></div>
+        <div class="pt-4 flex items-center justify-end bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-xl">
+          <button id="btn-convert-images" onclick="convertImagesToPdf()" class="px-7 py-3 bg-amber-600 hover:bg-amber-500 text-white font-semibold rounded-xl shadow-lg shadow-amber-600/30 flex items-center space-x-2 transition">
+            <i class="fa-solid fa-file-pdf"></i><span>Combinar y Descargar PDF</span>
+          </button>
+        </div>
+      </div>
+    </div>    <!-- VIEW 4: PDF A MARKDOWN -->
+    <div id="view-tool-pdf2md" class="space-y-6 hidden">
+      <div class="flex items-center justify-between bg-slate-900/80 border border-slate-800 p-4 rounded-2xl">
+        <div class="flex items-center space-x-3">
+          <button onclick="goToDashboard()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center space-x-1.5 transition border border-slate-700">
+            <i class="fa-solid fa-arrow-left"></i><span>Dashboard</span>
+          </button>
+          <div class="h-4 w-px bg-slate-700"></div>
+          <span class="text-sm font-bold text-white flex items-center space-x-2"><i class="fa-solid fa-file-invoice text-purple-400 text-base"></i><span>Conversor de PDF a Markdown</span></span>
+        </div>
+      </div>
+      <input type="file" id="pdf2md-file-input" accept=".pdf" style="display:none;">
+      <div onclick="document.getElementById('pdf2md-file-input').click()" class="border-2 border-dashed border-slate-700 hover:border-purple-500 bg-slate-900/60 hover:bg-slate-900 rounded-2xl p-10 text-center transition cursor-pointer shadow-lg">
+        <div class="flex flex-col items-center justify-center space-y-4">
+          <div class="w-16 h-16 rounded-2xl bg-purple-500/10 text-purple-400 flex items-center justify-center text-3xl"><i class="fa-solid fa-file-pdf"></i></div>
+          <div>
+            <p class="text-base font-semibold text-white">Arrastra o selecciona un archivo PDF</p>
+            <p class="text-xs text-slate-400 mt-1">Extrae el texto y estructura completa a formato Markdown (.md).</p>
+          </div>
+          <button type="button" class="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold rounded-xl shadow-md transition flex items-center space-x-2">
+            <i class="fa-regular fa-folder-open"></i><span>Seleccionar archivo PDF</span>
+          </button>
+        </div>
+      </div>
+      <div id="pdf2md-result-container" class="space-y-4 hidden">
+        <div class="flex items-center justify-between bg-slate-900 p-4 border border-slate-800 rounded-2xl shadow-xl">
+          <div class="flex items-center space-x-2">
+            <i class="fa-brands fa-markdown text-purple-400 text-lg"></i>
+            <span id="pdf2md-doc-name" class="text-sm font-semibold text-white">documento.md</span>
+          </div>
+          <div class="flex items-center space-x-2">
+            <button onclick="copyPdf2MdText()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs transition"><i class="fa-regular fa-copy mr-1"></i>Copiar Markdown</button>
+            <button onclick="downloadPdf2MdFile()" class="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold shadow-lg shadow-purple-600/30 transition flex items-center space-x-1.5"><i class="fa-solid fa-download"></i><span>Descargar .md</span></button>
+          </div>
+        </div>
+        <textarea id="pdf2md-textarea" class="w-full h-96 bg-slate-900 border border-slate-800 rounded-2xl p-5 text-slate-200 font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-purple-500 leading-relaxed shadow-xl"></textarea>
+      </div>
+    </div>
+
+    <!-- VIEW 5: HTML A PDF -->
+    <div id="view-tool-html" class="space-y-6 hidden">
+      <div class="flex items-center justify-between bg-slate-900/80 border border-slate-800 p-4 rounded-2xl">
+        <div class="flex items-center space-x-3">
+          <button onclick="goToDashboard()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center space-x-1.5 transition border border-slate-700">
+            <i class="fa-solid fa-arrow-left"></i><span>Dashboard</span>
+          </button>
+          <div class="h-4 w-px bg-slate-700"></div>
+          <span class="text-sm font-bold text-white flex items-center space-x-2"><i class="fa-brands fa-html5 text-rose-400 text-base"></i><span>Conversor de HTML a PDF</span></span>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[700px]">
+        <div class="flex flex-col bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-sm font-semibold text-white flex items-center space-x-2"><i class="fa-solid fa-code text-rose-400"></i><span>C&oacute;digo HTML</span></span>
+            <button onclick="loadSampleHtml()" class="text-xs px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg transition">Cargar Ejemplo</button>
+          </div>
+          <textarea id="html-textarea" placeholder="Escribe o pega c&oacute;digo HTML aqu&iacute;..." class="w-full flex-1 bg-slate-950 border border-slate-800 rounded-xl p-4 text-slate-200 font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-rose-500 leading-relaxed"></textarea>
+          <div class="mt-4 flex items-center justify-end pt-3 border-t border-slate-800">
+            <button id="btn-html-convert" onclick="convertHtmlToPdf()" class="px-5 py-2.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl flex items-center space-x-2 transition shadow-lg shadow-rose-600/20"><i class="fa-solid fa-file-pdf"></i><span>Descargar PDF</span></button>
+          </div>
+        </div>
+        <div class="flex flex-col bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl overflow-hidden">
+          <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-800">
+            <span class="text-sm font-semibold text-white flex items-center space-x-2"><i class="fa-regular fa-eye text-rose-400"></i><span>Vista Previa en Vivo</span></span>
+          </div>
+          <div class="w-full flex-1 bg-white rounded-xl overflow-hidden border border-slate-800 shadow-inner relative">
+            <iframe id="html-preview-frame" class="w-full h-full border-0" src="about:blank"></iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW 6: JSON / CSV A EXCEL -->
+    <div id="view-tool-excel" class="space-y-6 hidden">
+      <div class="flex items-center justify-between bg-slate-900/80 border border-slate-800 p-4 rounded-2xl">
+        <div class="flex items-center space-x-3">
+          <button onclick="goToDashboard()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center space-x-1.5 transition border border-slate-700">
+            <i class="fa-solid fa-arrow-left"></i><span>Dashboard</span>
+          </button>
+          <div class="h-4 w-px bg-slate-700"></div>
+          <span class="text-sm font-bold text-white flex items-center space-x-2"><i class="fa-regular fa-file-excel text-teal-400 text-base"></i><span>Conversor de JSON / CSV a Excel (.xlsx)</span></span>
+        </div>
+      </div>
+      <input type="file" id="excel-file-input" accept=".json,.csv" style="display:none;">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="flex flex-col bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-semibold text-white">Datos de Entrada (JSON o CSV)</span>
+            <div class="flex items-center space-x-2">
+              <button onclick="loadSampleExcelData()" class="text-xs px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg transition">Cargar Ejemplo</button>
+              <button onclick="document.getElementById('excel-file-input').click()" class="text-xs px-2.5 py-1 bg-teal-600/30 hover:bg-teal-600/40 text-teal-300 rounded-lg border border-teal-500/30 transition">Subir Archivo</button>
             </div>
+          </div>
+          <textarea id="excel-textarea" placeholder='Pega un JSON array [{"nombre": "Ana", "edad": 28}] o CSV "nombre,edad\nAna,28"...' class="w-full h-80 bg-slate-950 border border-slate-800 rounded-xl p-4 text-slate-200 font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-teal-500 leading-relaxed"></textarea>
+          <button id="btn-export-excel" onclick="exportToExcel()" class="w-full py-3 bg-teal-600 hover:bg-teal-500 text-white text-xs font-semibold rounded-xl shadow-lg shadow-teal-600/25 transition flex items-center justify-center space-x-2">
+            <i class="fa-solid fa-file-excel text-base"></i><span>Exportar y Descargar Archivo Excel (.xlsx)</span>
+          </button>
+        </div>
+        <div class="flex flex-col bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4 overflow-hidden">
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-semibold text-white">Vista Previa de Tabla</span>
+            <span id="excel-rows-badge" class="text-xs font-mono text-teal-400 bg-teal-500/10 px-2.5 py-0.5 rounded-full border border-teal-500/20">0 filas</span>
+          </div>
+          <div id="excel-preview-container" class="flex-1 max-h-96 overflow-auto bg-slate-950 rounded-xl border border-slate-800 p-2">
+            <table id="excel-preview-table" class="w-full text-left text-xs text-slate-300 border-collapse"></table>
           </div>
         </div>
       </div>
@@ -417,13 +502,10 @@
         </div>
         <div class="flex items-center space-x-3">
           <div class="flex items-center bg-slate-800 border border-slate-700 rounded-lg overflow-hidden">
-            <button onclick="changeModalZoom(-0.1)" title="Alejar" class="px-2.5 py-1 text-xs text-slate-300 hover:text-white hover:bg-slate-700 transition"><i class="fa-solid fa-minus"></i></button>
+            <button onclick="changeModalZoom(-0.1)" class="px-2.5 py-1 text-xs text-slate-300 hover:text-white hover:bg-slate-700"><i class="fa-solid fa-minus"></i></button>
             <span id="modal-zoom-label" class="text-xs px-2 font-mono text-indigo-300 select-none">100%</span>
-            <button onclick="changeModalZoom(0.1)" title="Acercar" class="px-2.5 py-1 text-xs text-slate-300 hover:text-white hover:bg-slate-700 transition"><i class="fa-solid fa-plus"></i></button>
+            <button onclick="changeModalZoom(0.1)" class="px-2.5 py-1 text-xs text-slate-300 hover:text-white hover:bg-slate-700"><i class="fa-solid fa-plus"></i></button>
           </div>
-          <button id="modal-btn-print" onclick="printActiveModalFrame()" class="text-xs px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium flex items-center space-x-1.5 transition border border-slate-700">
-            <i class="fa-solid fa-print"></i><span>Imprimir / PDF</span>
-          </button>
           <button id="modal-btn-download" onclick="downloadActiveModalFile()" class="text-xs px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-medium flex items-center space-x-1.5 transition shadow-lg shadow-indigo-600/25">
             <i class="fa-solid fa-download"></i><span>Descargar PDF</span>
           </button>
